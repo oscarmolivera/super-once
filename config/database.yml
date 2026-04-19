@@ -3,7 +3,6 @@ default: &default
   encoding: unicode
   max_connections: <%= Rails.application.credentials.dig(:rails_max_threads) %>
 
-
 development:
   <<: *default
   database: superonce_development
@@ -26,3 +25,7 @@ production:
     <<: *primary_production
     database: superonce_production_queue
     migrations_paths: db/queue_migrate
+  cable:
+    <<: *primary_production
+    database: superonce_production_cable
+    migrations_paths: db/cable_migrate
