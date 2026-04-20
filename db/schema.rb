@@ -10,23 +10,46 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_20_130246) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_20_215821) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "academies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "city"
+    t.string "country", default: "ES"
     t.datetime "created_at", null: false
+    t.text "description"
     t.string "logo_url"
     t.string "name", null: false
+    t.string "phone"
     t.integer "plan", default: 0, null: false
+    t.string "primary_color", default: "#4f46e5"
     t.string "slug", null: false
     t.string "sport_type", default: "soccer", null: false
     t.integer "status", default: 0, null: false
     t.date "trial_ends_on"
     t.datetime "updated_at", null: false
+    t.string "website"
     t.index ["plan"], name: "index_academies_on_plan"
     t.index ["slug"], name: "index_academies_on_slug", unique: true
     t.index ["status"], name: "index_academies_on_status"
+  end
+
+  create_table "invitations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.datetime "accepted_at"
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.datetime "expires_at", null: false
+    t.bigint "invited_by_id", null: false
+    t.integer "role", default: 0, null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "email"], name: "index_invitations_on_academy_id_and_email", unique: true
+    t.index ["academy_id"], name: "index_invitations_on_academy_id"
+    t.index ["expires_at"], name: "index_invitations_on_expires_at"
+    t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
+    t.index ["token"], name: "index_invitations_on_token", unique: true
   end
 
   create_table "memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -63,6 +86,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_20_130246) do
     t.index ["superadmin"], name: "index_users_on_superadmin", where: "(superadmin = true)"
   end
 
+  add_foreign_key "invitations", "academies"
+  add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "memberships", "academies"
   add_foreign_key "memberships", "users"
   add_foreign_key "sessions", "users"

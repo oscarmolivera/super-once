@@ -1,0 +1,58 @@
+<%# This view uses the marketing layout — it's a public page, no sidebar %>
+<% content_for :title, "Accept invitation" %>
+
+<div class="max-w-md mx-auto px-6 py-20">
+
+  <% if @invitation.nil? %>
+    <%# Invalid or expired token %>
+    <div class="text-center">
+      <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-5">
+        <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900 mb-3">Invitation not found</h1>
+      <p class="text-gray-500 mb-8">This invitation link is invalid or has already expired. Ask your academy admin to send a new one.</p>
+      <a href="https://www.nubbe.net" class="text-indigo-600 text-sm font-medium hover:underline">Go to SuperOnce &rarr;</a>
+    </div>
+
+  <% else %>
+    <%# Valid invitation %>
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center text-white text-2xl font-bold"
+           style="background-color: <%= @academy.primary_color || '#4f46e5' %>">
+        <%= @academy.name.first.upcase %>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">You're invited!</h1>
+      <p class="text-gray-500">
+        Join <strong class="text-gray-800"><%= @academy.name %></strong>
+        as a <strong class="text-gray-800"><%= @invitation.role.capitalize %></strong>.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6 text-sm text-gray-600">
+      <div class="flex justify-between py-2 border-b border-gray-100 last:border-0">
+        <span class="text-gray-400">Academy</span>
+        <span class="font-medium text-gray-900"><%= @academy.name %></span>
+      </div>
+      <div class="flex justify-between py-2 border-b border-gray-100">
+        <span class="text-gray-400">Role</span>
+        <span class="font-medium text-gray-900 capitalize"><%= @invitation.role %></span>
+      </div>
+      <div class="flex justify-between py-2">
+        <span class="text-gray-400">Expires</span>
+        <span class="font-medium text-gray-900"><%= @invitation.expires_at.strftime("%b %d, %Y") %></span>
+      </div>
+    </div>
+
+    <%= form_with url: accept_invitation_path(@invitation.token), method: :post do |f| %>
+      <%= f.submit "Accept and join #{@academy.name}",
+            class: "w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors cursor-pointer text-sm" %>
+    <% end %>
+
+    <p class="text-center text-xs text-gray-400 mt-4">
+      You'll need a SuperOnce account to accept this invitation.
+    </p>
+  <% end %>
+
+</div>

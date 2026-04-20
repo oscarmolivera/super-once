@@ -1,0 +1,22 @@
+<% content_for :title, "Enterprise" %>
+
+<div class="max-w-4xl mx-auto">
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-2">
+      <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>
+        </svg>
+      </div>
+      <h1 class="text-xl font-semibold text-gray-900">Enterprise</h1>
+    </div>
+    <p class="text-sm text-gray-500">Staff, payroll, finances and inventory. Coming in Phase 3.</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <%= render "shared/coming_soon_card", title: "Employees",       description: "Manage coaches, assistants and staff" %>
+    <%= render "shared/coming_soon_card", title: "Payroll",         description: "Monthly salary register" %>
+    <%= render "shared/coming_soon_card", title: "Finances",        description: "Income, expenses and player payments" %>
+    <%= render "shared/coming_soon_card", title: "Inventory",       description: "Equipment and asset tracking" %>
+  </div>
+</div>

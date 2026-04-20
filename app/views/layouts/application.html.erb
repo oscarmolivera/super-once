@@ -8,75 +8,121 @@
     <title><%= content_for?(:title) ? yield(:title) + " — " : "" %><%= current_academy&.name || "SuperOnce" %></title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="h-full font-sans antialiased">
+  <body class="h-full font-sans antialiased" data-controller="sidebar">
+
     <div class="flex h-full">
 
-      <%# ── Sidebar ────────────────────────────────────────── %>
-      <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-gray-200">
+      <%# ── Mobile sidebar backdrop ─────────────────── %>
+      <div class="relative z-50 lg:hidden"
+           data-sidebar-target="backdrop"
+           data-action="click->sidebar#close"
+           style="display:none">
+        <div class="fixed inset-0 bg-gray-900/50"></div>
+      </div>
+
+      <%# ── Sidebar ──────────────────────────────────── %>
+      <aside id="sidebar"
+             class="fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-200"
+             data-sidebar-target="panel">
+
         <%# Academy branding %>
-        <div class="flex items-center gap-3 h-16 px-6 border-b border-gray-200">
-          <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-sm font-semibold">
+        <div class="flex items-center gap-3 h-16 px-5 border-b border-gray-200 flex-shrink-0">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+               style="background-color: <%= current_academy.primary_color || '#4f46e5' %>">
             <%= current_academy.name.first.upcase %>
           </div>
-          <span class="font-semibold text-gray-900 truncate"><%= current_academy.name %></span>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate"><%= current_academy.name %></p>
+            <p class="text-xs text-gray-400 capitalize"><%= current_academy.plan %> plan</p>
+          </div>
         </div>
 
         <%# Primary nav %>
-        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          <%= render "shared/nav_item", path: tenant_root_path,      label: "Dashboard",   icon: "home" %>
+        <nav class="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
+          <%= render "shared/nav_item", path: tenant_root_path, label: "Dashboard", icon: "home" %>
 
-          <p class="mt-6 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Pillars</p>
+          <div class="pt-5 pb-1.5">
+            <p class="px-3 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Pillars</p>
+          </div>
 
-          <%= render "shared/nav_item", path: enterprise_root_path,  label: "Enterprise",  icon: "building" %>
-          <%= render "shared/nav_item", path: school_root_path,      label: "School",      icon: "academic-cap" %>
-          <%= render "shared/nav_item", path: club_root_path,        label: "Club",        icon: "trophy" %>
+          <%= render "shared/nav_item", path: enterprise_root_path, label: "Enterprise", icon: "building",      accent: "indigo" %>
+          <%= render "shared/nav_item", path: school_root_path,     label: "School",     icon: "academic-cap",  accent: "teal" %>
+          <%= render "shared/nav_item", path: club_root_path,       label: "Club",       icon: "trophy",        accent: "amber" %>
 
-          <p class="mt-6 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Settings</p>
+          <div class="pt-5 pb-1.5">
+            <p class="px-3 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Manage</p>
+          </div>
 
-          <%= render "shared/nav_item", path: memberships_path,      label: "Members",     icon: "users" %>
-          <%= render "shared/nav_item", path: edit_academy_settings_path, label: "Academy settings", icon: "cog" %>
+          <%= render "shared/nav_item", path: memberships_path,          label: "Members",  icon: "users" %>
+          <% if policy(current_academy).settings_edit? %>
+            <%= render "shared/nav_item", path: edit_academy_settings_path, label: "Settings", icon: "cog" %>
+          <% end %>
         </nav>
 
-        <%# Current user footer %>
-        <div class="flex items-center gap-3 px-4 py-4 border-t border-gray-200">
-          <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-medium">
-            <%= current_user.full_name&.first&.upcase || current_user.email_address.first.upcase %>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 truncate"><%= current_user.full_name || current_user.email_address %></p>
-            <p class="text-xs text-gray-500 capitalize"><%= current_membership.role %></p>
-          </div>
-          <%= button_to "Sign out", session_path, method: :delete,
-                class: "text-xs text-gray-400 hover:text-gray-600" %>
+        <%# User footer %>
+        <div class="border-t border-gray-200 p-3">
+          <%= link_to profile_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group" do %>
+            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-semibold flex-shrink-0">
+
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-700 transition-colors">
+
+              </p>
+              <p class="text-xs text-gray-500 capitalize"></p>
+            </div>
+          <% end %>
+          <%= button_to session_path, method: :delete,
+                class: "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors mt-0.5" do %>
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
+            </svg>
+            Sign out
+          <% end %>
         </div>
       </aside>
 
-      <%# ── Main content area ──────────────────────────────── %>
+      <%# ── Main ────────────────────────────────────── %>
       <div class="flex-1 lg:pl-64 flex flex-col min-h-full">
 
-        <%# Flash messages %>
-        <% if notice %>
-          <div class="mx-6 mt-4 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm" role="alert">
-            <%= notice %>
-          </div>
-        <% end %>
-        <% if alert %>
-          <div class="mx-6 mt-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm" role="alert">
-            <%= alert %>
-          </div>
-        <% end %>
+        <%# Mobile topbar %>
+        <div class="sticky top-0 z-40 flex items-center gap-4 h-14 px-4 bg-white border-b border-gray-200 lg:hidden">
+          <button type="button" data-action="sidebar#open" class="p-1.5 rounded-md text-gray-500 hover:bg-gray-100">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+            </svg>
+          </button>
+          <span class="text-sm font-semibold text-gray-900 truncate"><%= current_academy.name %></span>
+        </div>
+
+        <%# Flash %>
+        <div class="px-6 pt-4 space-y-2" id="flash-messages">
+          <% if notice %>
+            <div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm" role="alert">
+              <svg class="w-4 h-4 flex-shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd"/></svg>
+              <%= notice %>
+            </div>
+          <% end %>
+          <% if alert %>
+            <div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm" role="alert">
+              <svg class="w-4 h-4 flex-shrink-0 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+              <%= alert %>
+            </div>
+          <% end %>
+        </div>
 
         <%# Page content %>
-        <main class="flex-1 px-6 py-8">
+        <main class="flex-1 px-6 py-8" id="main-content">
           <%= yield %>
         </main>
-      </div>
 
+      </div>
     </div>
+
   </body>
 </html>

@@ -1,4 +1,4 @@
-class CreateMemberships < ActiveRecord::Migration[8.0]
+class CreateMemberships < ActiveRecord::Migration[8.1]
   def change
     create_table :memberships, id: :uuid do |t|
       t.references :academy, null: false, foreign_key: true, type: :uuid
