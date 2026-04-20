@@ -9,8 +9,11 @@ environment rails_env
 app_dir = File.expand_path("..", __dir__)
 shared_dir = "#{app_dir}/tmp"
 
-# ── Unix socket (same pattern as eloy-back-timer) ──
-bind "unix://#{shared_dir}/sockets/puma.sock"
+# Local environment binding
+port ENV.fetch("PORT") { 3000 } if rails_env == "development"
+
+# Unix socket binding for production (e.g., with Caddy)
+bind "unix://#{shared_dir}/sockets/puma.sock" if rails_env == "production"
 
 # ── Logging ──
 stdout_redirect "#{app_dir}/log/puma.stdout.log",
