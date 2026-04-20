@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  namespace :admin do
+      resources :sessions
+      resources :users
+
+      root to: "sessions#index"
+    end
   resource :session
   resources :passwords, param: :token
   root "pages#placeholder"
