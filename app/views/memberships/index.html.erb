@@ -1,0 +1,49 @@
+<% content_for :title, "Members" %>
+
+<div class="max-w-3xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-xl font-semibold text-gray-900">Members</h1>
+      <p class="text-sm text-gray-500 mt-1">People with access to <%= current_academy.name %></p>
+    </div>
+    <% if policy(Membership).new? %>
+      <%= link_to "Add member", new_membership_path,
+            class: "inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors" %>
+    <% end %>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <% if @memberships.any? %>
+      <ul class="divide-y divide-gray-100">
+        <% @memberships.each do |membership| %>
+          <li class="flex items-center gap-4 px-6 py-4">
+            <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-sm font-medium flex-shrink-0">
+              <%= membership.user.full_name&.first&.upcase || membership.user.email_address.first.upcase %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate">
+                <%= membership.user.full_name || membership.user.email_address %>
+              </p>
+              <p class="text-xs text-gray-500 truncate"><%= membership.user.email_address %></p>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+              <%= membership.owner? ? 'bg-indigo-50 text-indigo-700' :
+                  membership.admin? ? 'bg-blue-50 text-blue-700' :
+                                      'bg-gray-100 text-gray-600' %>">
+              <%= membership.role.capitalize %>
+            </span>
+            <% if policy(membership).destroy? && !(membership.owner? && current_academy.memberships.owners.count <= 1) %>
+              <%= button_to membership_path(membership), method: :delete,
+                    data: { turbo_confirm: "Remove #{membership.user.email_address} from this academy?" },
+                    class: "text-xs text-red-400 hover:text-red-600 ml-2" do %>
+                Remove
+              <% end %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <div class="px-6 py-12 text-center text-sm text-gray-400">No members yet.</div>
+    <% end %>
+  </div>
+</div>
