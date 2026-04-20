@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= content_for?(:title) ? yield(:title) + " — " : "" %>SuperOnce · nubbe.net</title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body class="h-full font-sans antialiased bg-white text-gray-900">
+    <header class="border-b border-gray-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
+      <a href="/" class="text-xl font-semibold text-indigo-600">SuperOnce</a>
+      <nav class="flex items-center gap-6 text-sm text-gray-600">
+        <%= link_to "Pricing", pricing_path %>
+        <%= link_to "About",   about_path %>
+      </nav>
+    </header>
+
+    <main>
+      <%= yield %>
+    </main>
+
+    <footer class="mt-24 border-t border-gray-100 px-6 py-8 text-center text-sm text-gray-400">
+      &copy; <%= Date.current.year %> nubbe.net — SuperOnce
+    </footer>
+  </body>
+</html>
