@@ -8,75 +8,29 @@
     <title><%= content_for?(:title) ? yield(:title) + " — " : "" %><%= current_academy&.name || "SuperOnce" %></title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="h-full font-sans antialiased">
+  <body class="h-full font-sans antialiased" data-controller="sidebar">
+
     <div class="flex h-full">
+      <%# ── Sidebar ────────────────────────────────────── %>
+      <%= render "shared/sidebar" %>
+      <%= render "shared/mobile_sidebar_backdrop" %>
 
-      <%# ── Sidebar ────────────────────────────────────────── %>
-      <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-gray-200">
-        <%# Academy branding %>
-        <div class="flex items-center gap-3 h-16 px-6 border-b border-gray-200">
-          <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-sm font-semibold">
-            <%= current_academy.name.first.upcase %>
-          </div>
-          <span class="font-semibold text-gray-900 truncate"><%= current_academy.name %></span>
-        </div>
-
-        <%# Primary nav %>
-        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          <%= render "shared/nav_item", path: tenant_root_path,      label: "Dashboard",   icon: "home" %>
-
-          <p class="mt-6 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Pillars</p>
-
-          <%= render "shared/nav_item", path: enterprise_root_path,  label: "Enterprise",  icon: "building" %>
-          <%= render "shared/nav_item", path: school_root_path,      label: "School",      icon: "academic-cap" %>
-          <%= render "shared/nav_item", path: club_root_path,        label: "Club",        icon: "trophy" %>
-
-          <p class="mt-6 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Settings</p>
-
-          <%= render "shared/nav_item", path: memberships_path,      label: "Members",     icon: "users" %>
-          <%= render "shared/nav_item", path: edit_academy_settings_path, label: "Academy settings", icon: "cog" %>
-        </nav>
-
-        <%# Current user footer %>
-        <div class="flex items-center gap-3 px-4 py-4 border-t border-gray-200">
-          <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-medium">
-            <%= current_user.full_name&.first&.upcase || current_user.email_address.first.upcase %>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 truncate"><%= current_user.full_name || current_user.email_address %></p>
-            <p class="text-xs text-gray-500 capitalize"><%= current_membership.role %></p>
-          </div>
-          <%= button_to "Sign out", session_path, method: :delete,
-                class: "text-xs text-gray-400 hover:text-gray-600" %>
-        </div>
-      </aside>
-
-      <%# ── Main content area ──────────────────────────────── %>
+      <%# ── Main ────────────────────────────────────── %>
       <div class="flex-1 lg:pl-64 flex flex-col min-h-full">
-
-        <%# Flash messages %>
-        <% if notice %>
-          <div class="mx-6 mt-4 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm" role="alert">
-            <%= notice %>
-          </div>
-        <% end %>
-        <% if alert %>
-          <div class="mx-6 mt-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm" role="alert">
-            <%= alert %>
-          </div>
-        <% end %>
+        <%# Top bar for mobile %>
+        <%= render "shared/mobile_topbar" %>
 
         <%# Page content %>
-        <main class="flex-1 px-6 py-8">
+        <main class="flex-1 px-6 py-8" id="main-content">
           <%= yield %>
         </main>
-      </div>
 
+      </div>
     </div>
+
   </body>
 </html>

@@ -30,11 +30,13 @@ group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem "factory_bot_rails"
   gem "faker"
+  gem "letter_opener"
   gem "rubocop-rails-omakase", require: false
 end
 
 group :development do
   gem "bullet"
+  gem "foreman"
   gem "web-console"
 end
 

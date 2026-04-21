@@ -1,8 +1,9 @@
 class Academy < ApplicationRecord
   # This IS the tenant. Every model that belongs to an academy
   # calls `acts_as_tenant(:academy)` and gets automatic account scoping.
-  has_many :memberships, dependent: :destroy
-  has_many :users, through: :memberships
+  has_many :memberships,  dependent: :destroy
+  has_many :users,        through: :memberships
+  has_many :invitations,  dependent: :destroy
 
   # ── Validations ──────────────────────────────────────────────
   validates :name, presence: true

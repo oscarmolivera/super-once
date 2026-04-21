@@ -1,8 +1,14 @@
-<%# locals: (path:, label:, icon:) %>
-<%= link_to path,
-      class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors #{
-        current_page?(path) ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100'
-      }" do %>
+<%# locals: (path:, label:, icon:, accent: "indigo") %>
+<% accent ||= "indigo" %>
+<% active  = current_page?(path) %>
+<% active_classes = case accent
+   when "teal"  then "bg-teal-50 text-teal-700"
+   when "amber" then "bg-amber-50 text-amber-700"
+   else              "bg-indigo-50 text-indigo-700"
+   end %>
+<% inactive_classes = "text-gray-600 hover:bg-gray-100 hover:text-gray-900" %>
+
+<%= link_to path, class: "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors #{active ? active_classes : inactive_classes}" do %>
   <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
     <% case icon %>
     <% when "home" %>

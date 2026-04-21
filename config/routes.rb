@@ -22,25 +22,32 @@ Rails.application.routes.draw do
   end
 
   # ─────────────────────────────────────────────
-  # {slug}.nubbe.net — Academy tenant dashboard
-  # Any subdomain that isn't www or admin
+  # {slug}.nubbe.net — Academy tenant
   # ─────────────────────────────────────────────
   constraints subdomain: /\A(?!www\z|admin\z).+\z/ do
-    # Rails 8 auth — session management
+
+    # ── Public (no auth required) ──────────────
+    get "welcome", to: "pages#academy", as: :academy_welcome
+    get  "invitations/:token", to: "invitations#accept",  as: :accept_invitation
+    post "invitations/:token", to: "invitations#confirm"
+
+    # ── Auth (Rails 8 generated) ───────────────
     resource  :session
     resources :passwords, param: :token
 
-    # Dashboard root (post-login)
+    # ── Authenticated tenant routes ────────────
     root "dashboard#index", as: :tenant_root
 
-    # Academy settings
+    resource :profile, only: %i[show edit update]
+
     resource :academy_settings, only: %i[show edit update]
 
-    # Members management
-    resources :memberships, only: %i[index new create destroy]
+    resources :memberships, only: %i[index new create destroy] do
+      member { patch :promote }
+    end
+
     resources :invitations, only: %i[new create]
 
-    # Pillar namespaces (built in Phases 3-5)
     namespace :enterprise do
       root "dashboard#index"
     end
@@ -54,10 +61,7 @@ Rails.application.routes.draw do
     end
   end
 
-  # Health check (no subdomain constraint — Kamal/load balancer)
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # PWA
-  get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+  get "manifest"       => "rails/pwa#manifest",      as: :pwa_manifest
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 end

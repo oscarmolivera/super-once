@@ -1,23 +1,30 @@
 <% content_for :title, "Members" %>
 
 <div class="max-w-3xl mx-auto">
+
+  <%# Page header %>
   <div class="flex items-center justify-between mb-6">
     <div>
       <h1 class="text-xl font-semibold text-gray-900">Members</h1>
-      <p class="text-sm text-gray-500 mt-1">People with access to <%= current_academy.name %></p>
+      <p class="text-sm text-gray-500 mt-0.5"><%= current_academy.name %></p>
     </div>
-    <% if policy(Membership).new? %>
-      <%= link_to "Add member", new_membership_path,
-            class: "inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors" %>
+    <% if policy(Invitation).new? %>
+      <%= link_to "Invite member", new_invitation_path,
+            class: "inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors" %>
     <% end %>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+  <%# Active members %>
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+    <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-gray-900">Active members</h2>
+      <span class="text-xs text-gray-400"><%= @memberships.count %> total</span>
+    </div>
     <% if @memberships.any? %>
       <ul class="divide-y divide-gray-100">
         <% @memberships.each do |membership| %>
-          <li class="flex items-center gap-4 px-6 py-4">
-            <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-sm font-medium flex-shrink-0">
+          <li class="flex items-center gap-4 px-5 py-3.5">
+            <div class="w-9 h-9 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-700 text-sm font-semibold flex-shrink-0">
               <%= membership.user.full_name&.first&.upcase || membership.user.email_address.first.upcase %>
             </div>
             <div class="flex-1 min-w-0">
@@ -26,24 +33,73 @@
               </p>
               <p class="text-xs text-gray-500 truncate"><%= membership.user.email_address %></p>
             </div>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-              <%= membership.owner? ? 'bg-indigo-50 text-indigo-700' :
-                  membership.admin? ? 'bg-blue-50 text-blue-700' :
-                                      'bg-gray-100 text-gray-600' %>">
-              <%= membership.role.capitalize %>
-            </span>
-            <% if policy(membership).destroy? && !(membership.owner? && current_academy.memberships.owners.count <= 1) %>
+
+            <%# Role badge — owners can change roles %>
+            <% if policy(membership).update? %>
+              <%= form_with url: promote_membership_path(membership), method: :patch, class: "flex items-center" do |f| %>
+                <%= f.select :role,
+                      options_for_select(Membership.roles.keys.map { |r| [r.capitalize, r] }, membership.role),
+                      {},
+                      class: "text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-700 bg-white",
+                      onchange: "this.form.requestSubmit()" %>
+              <% end %>
+            <% else %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                <%= membership.owner? ? 'bg-indigo-50 text-indigo-700' :
+                    membership.admin?  ? 'bg-blue-50 text-blue-700' :
+                                         'bg-gray-100 text-gray-600' %>">
+                <%= membership.role.capitalize %>
+              </span>
+            <% end %>
+
+            <%# Remove button — hide for current user and protected owners %>
+            <% can_remove = policy(membership).destroy? && membership.user != current_user %>
+            <% if can_remove %>
               <%= button_to membership_path(membership), method: :delete,
-                    data: { turbo_confirm: "Remove #{membership.user.email_address} from this academy?" },
-                    class: "text-xs text-red-400 hover:text-red-600 ml-2" do %>
-                Remove
+                    data: { turbo_confirm: "Remove #{membership.user.email_address} from #{current_academy.name}?" },
+                    class: "p-1.5 rounded-md text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors" do %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z"/>
+                </svg>
               <% end %>
             <% end %>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <div class="px-6 py-12 text-center text-sm text-gray-400">No members yet.</div>
+      <p class="px-5 py-10 text-center text-sm text-gray-400">No members yet.</p>
     <% end %>
   </div>
+
+  <%# Pending invitations (admins and owners only) %>
+  <% if @invitations&.any? %>
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="px-5 py-3 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-900">Pending invitations</h2>
+      </div>
+      <ul class="divide-y divide-gray-100">
+        <% @invitations.each do |inv| %>
+          <li class="flex items-center gap-4 px-5 py-3.5">
+            <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm flex-shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-700 truncate"><%= inv.email %></p>
+              <p class="text-xs text-gray-400">
+                Invited by <%= inv.invited_by.full_name || inv.invited_by.email_address %> ·
+                Expires <%= inv.expires_at.strftime("%b %d") %>
+              </p>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+              <%= inv.role.capitalize %>
+            </span>
+            <span class="text-xs text-gray-400">Pending</span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
 </div>

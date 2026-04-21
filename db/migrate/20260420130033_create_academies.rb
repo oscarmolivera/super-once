@@ -1,4 +1,4 @@
-class CreateAcademies < ActiveRecord::Migration[8.0]
+class CreateAcademies < ActiveRecord::Migration[8.1]
   def change
     create_table :academies, id: :uuid do |t|
       t.string  :name,       null: false

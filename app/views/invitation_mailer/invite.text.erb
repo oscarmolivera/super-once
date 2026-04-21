@@ -1,0 +1,8 @@
+<%= @inviter.full_name || @inviter.email_address %> has invited you to join <%= @academy.name %> on SuperOnce as a <%= @invitation.role.capitalize %>.
+
+Accept your invitation here (expires in 7 days):
+<%= @accept_url %>
+
+If you weren't expecting this invitation, you can safely ignore this email.
+
+-- SuperOnce / nubbe.net

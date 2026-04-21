@@ -1,0 +1,35 @@
+<% content_for :title, "Academy settings" %>
+
+<div class="max-w-2xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-xl font-semibold text-gray-900">Academy settings</h1>
+      <p class="text-sm text-gray-500 mt-0.5"><%= @academy.full_domain %></p>
+    </div>
+    <% if policy(@academy).settings_edit? %>
+      <%= link_to "Edit", edit_academy_settings_path,
+            class: "px-4 py-2 text-sm font-medium text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors" %>
+    <% end %>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+    <%= render "shared/setting_row", label: "Academy name",  value: @academy.name %>
+    <%= render "shared/setting_row", label: "Sport",         value: @academy.sport_type&.capitalize %>
+    <%= render "shared/setting_row", label: "Plan",          value: @academy.plan&.capitalize %>
+    <%= render "shared/setting_row", label: "Status",        value: @academy.status&.capitalize %>
+    <%= render "shared/setting_row", label: "City",          value: @academy.city.presence || "—" %>
+    <%= render "shared/setting_row", label: "Country",       value: @academy.country %>
+    <%= render "shared/setting_row", label: "Phone",         value: @academy.phone.presence || "—" %>
+    <%= render "shared/setting_row", label: "Website",       value: @academy.website.presence || "—" %>
+    <%= render "shared/setting_row", label: "Description",   value: @academy.description.presence || "—" %>
+
+    <div class="flex items-center gap-4 px-6 py-4">
+      <span class="text-sm text-gray-500 w-36 flex-shrink-0">Brand colour</span>
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-md border border-gray-200"
+             style="background-color: <%= @academy.primary_color %>"></div>
+        <span class="text-sm text-gray-900 font-mono"><%= @academy.primary_color %></span>
+      </div>
+    </div>
+  </div>
+</div>
