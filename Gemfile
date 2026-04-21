@@ -36,6 +36,7 @@ end
 
 group :development do
   gem "bullet"
+  gem "foreman"
   gem "web-console"
 end
 
