@@ -10,7 +10,7 @@ module Admin
     def require_superadmin
       unless Current.user&.superadmin?
         flash[:alert] = "Superadmin access required."
-        redirect_to "https://www.nubbe.net"
+        redirect_to root_path, status: :see_other
       end
     end
 

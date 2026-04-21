@@ -9,7 +9,6 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
@@ -68,13 +67,13 @@
         <div class="border-t border-gray-200 p-3">
           <%= link_to profile_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group" do %>
             <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-sm font-semibold flex-shrink-0">
-
+              <%= current_user.full_name&.first&.upcase || current_user.email_address.first.upcase %>
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-700 transition-colors">
-
+                <%= current_user.full_name || current_user.email_address %>
               </p>
-              <p class="text-xs text-gray-500 capitalize"></p>
+              <p class="text-xs text-gray-500 capitalize"><%= current_membership.role %></p>
             </div>
           <% end %>
           <%= button_to session_path, method: :delete,
