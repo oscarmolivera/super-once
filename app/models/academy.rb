@@ -13,6 +13,17 @@ class Academy < ApplicationRecord
   has_many :inventory_items, dependent: :destroy
   has_many :tax_permits,     dependent: :destroy
 
+  # School pillar
+  has_many :sport_schools,       dependent: :destroy
+  has_many :categories,          dependent: :destroy
+  has_many :players,             dependent: :destroy
+  has_many :category_enrollments, dependent: :destroy
+  has_many :coach_assignments,    dependent: :destroy
+  has_many :practice_sessions,    dependent: :destroy
+  has_many :attendance_records,   dependent: :destroy
+  has_many :training_plans,       dependent: :destroy
+  has_many :announcements,        dependent: :destroy
+
   # ── Validations ─────────────────────────────────────────────────
   validates :name, presence: true
   validates :slug,

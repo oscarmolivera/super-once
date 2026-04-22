@@ -1,0 +1,46 @@
+<%= form_with model: [:school, @practice_session], class: "space-y-4" do |f| %>
+  <% if @practice_session.errors.any? %>
+    <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+      <div class="font-semibold mb-1">Please fix the following:</div>
+      <ul class="list-disc pl-5">
+        <% @practice_session.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :category_id, "Category", class: "block text-sm font-medium text-gray-700" %>
+    <%= f.collection_select :category_id, policy_scope(Category).order(:name), :id, :name,
+      { prompt: "Select a category" },
+      class: "mt-1 block w-full rounded-lg border-gray-300" %>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <%= f.label :starts_at, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.datetime_local_field :starts_at, class: "mt-1 block w-full rounded-lg border-gray-300" %>
+    </div>
+    <div>
+      <%= f.label :ends_at, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.datetime_local_field :ends_at, class: "mt-1 block w-full rounded-lg border-gray-300" %>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :location, class: "block text-sm font-medium text-gray-700" %>
+    <%= f.text_field :location, class: "mt-1 block w-full rounded-lg border-gray-300" %>
+  </div>
+
+  <div>
+    <%= f.label :notes, class: "block text-sm font-medium text-gray-700" %>
+    <%= f.text_area :notes, rows: 3, class: "mt-1 block w-full rounded-lg border-gray-300" %>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= f.submit class: "rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
+    <%= link_to "Cancel", school_practice_sessions_path, class: "text-sm text-gray-600 hover:text-gray-900" %>
+  </div>
+<% end %>
+

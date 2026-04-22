@@ -1,0 +1,37 @@
+<% content_for :title, "Practice sessions" %>
+
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold text-gray-900">Practice sessions</h1>
+    <% if policy(PracticeSession.new(academy: current_academy)).new? %>
+      <%= link_to "Schedule session", new_school_practice_session_path, class: "rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
+    <% end %>
+  </div>
+
+  <div class="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100">
+    <% @practice_sessions.each do |s| %>
+      <div class="p-4 flex items-center gap-3">
+        <div>
+          <div class="text-sm font-medium text-gray-900">
+            <%= link_to s.category.name, school_practice_session_path(s), class: "hover:underline" %>
+          </div>
+          <div class="text-xs text-gray-500">
+            <%= l(s.starts_at, format: :long) %>
+            <% if s.location.present? %>
+              <span class="text-gray-400">·</span>
+              <%= s.location %>
+            <% end %>
+          </div>
+        </div>
+        <div class="ml-auto">
+          <%= link_to "Attendance", attendance_school_practice_session_path(s), class: "text-sm text-indigo-600 hover:text-indigo-700" if policy(s).attendance? %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @practice_sessions.empty? %>
+      <div class="p-6 text-sm text-gray-500">No sessions scheduled yet.</div>
+    <% end %>
+  </div>
+</div>
+

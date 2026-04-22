@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_21_231403) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_22_125815) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -35,6 +35,74 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_231403) do
     t.index ["status"], name: "index_academies_on_status"
   end
 
+  create_table "announcements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.text "body"
+    t.uuid "category_id"
+    t.datetime "created_at", null: false
+    t.datetime "published_at"
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "category_id", "published_at"], name: "idx_on_academy_id_category_id_published_at_2444051ef8"
+    t.index ["academy_id"], name: "index_announcements_on_academy_id"
+    t.index ["category_id"], name: "index_announcements_on_category_id"
+  end
+
+  create_table "attendance_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.datetime "created_at", null: false
+    t.text "notes"
+    t.uuid "player_id", null: false
+    t.uuid "practice_session_id", null: false
+    t.integer "status"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "practice_session_id", "player_id"], name: "idx_attendance_records_unique", unique: true
+    t.index ["academy_id"], name: "index_attendance_records_on_academy_id"
+    t.index ["player_id"], name: "index_attendance_records_on_player_id"
+    t.index ["practice_session_id"], name: "index_attendance_records_on_practice_session_id"
+  end
+
+  create_table "categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "max_age"
+    t.integer "min_age"
+    t.string "name"
+    t.uuid "sport_school_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "sport_school_id", "name"], name: "index_categories_on_academy_id_and_sport_school_id_and_name"
+    t.index ["academy_id"], name: "index_categories_on_academy_id"
+    t.index ["sport_school_id"], name: "index_categories_on_sport_school_id"
+  end
+
+  create_table "category_enrollments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.uuid "category_id", null: false
+    t.datetime "created_at", null: false
+    t.date "ends_on"
+    t.uuid "player_id", null: false
+    t.date "starts_on"
+    t.integer "status"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "category_id", "player_id"], name: "idx_category_enrollments_unique", unique: true
+    t.index ["academy_id"], name: "index_category_enrollments_on_academy_id"
+    t.index ["category_id"], name: "index_category_enrollments_on_category_id"
+    t.index ["player_id"], name: "index_category_enrollments_on_player_id"
+  end
+
+  create_table "coach_assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.uuid "category_id", null: false
+    t.datetime "created_at", null: false
+    t.uuid "employee_id", null: false
+    t.integer "role"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "category_id", "employee_id"], name: "idx_coach_assignments_unique", unique: true
+    t.index ["academy_id"], name: "index_coach_assignments_on_academy_id"
+    t.index ["category_id"], name: "index_coach_assignments_on_category_id"
+    t.index ["employee_id"], name: "index_coach_assignments_on_employee_id"
+  end
+
   create_table "employees", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "academy_id", null: false
     t.decimal "base_salary", precision: 10, scale: 2, default: "0.0"
@@ -49,9 +117,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_231403) do
     t.string "phone"
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
     t.index ["academy_id", "employee_type"], name: "index_employees_on_academy_id_and_employee_type"
     t.index ["academy_id", "status"], name: "index_employees_on_academy_id_and_status"
+    t.index ["academy_id", "user_id"], name: "index_employees_on_academy_id_and_user_id", unique: true, where: "(user_id IS NOT NULL)"
     t.index ["academy_id"], name: "index_employees_on_academy_id"
+    t.index ["user_id"], name: "index_employees_on_user_id"
   end
 
   create_table "income_expenses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -136,6 +207,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_231403) do
     t.index ["academy_id"], name: "index_player_payments_on_academy_id"
   end
 
+  create_table "players", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.date "birth_date"
+    t.datetime "created_at", null: false
+    t.string "first_name"
+    t.string "guardian_email"
+    t.string "guardian_name"
+    t.string "guardian_phone"
+    t.string "last_name"
+    t.string "photo_url"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id"], name: "index_players_on_academy_id"
+  end
+
+  create_table "practice_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.uuid "category_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "ends_at"
+    t.string "location"
+    t.text "notes"
+    t.datetime "starts_at"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "category_id", "starts_at"], name: "idx_on_academy_id_category_id_starts_at_ec5d43bb0a"
+    t.index ["academy_id"], name: "index_practice_sessions_on_academy_id"
+    t.index ["category_id"], name: "index_practice_sessions_on_category_id"
+  end
+
   create_table "salaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "academy_id", null: false
     t.decimal "amount", precision: 10, scale: 2, null: false
@@ -163,6 +262,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_231403) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "sport_schools", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.string "sport_type"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id"], name: "index_sport_schools_on_academy_id"
+  end
+
   create_table "tax_permits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "academy_id", null: false
     t.datetime "created_at", null: false
@@ -181,6 +289,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_231403) do
     t.index ["academy_id"], name: "index_tax_permits_on_academy_id"
   end
 
+  create_table "training_plans", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.text "body"
+    t.uuid "category_id", null: false
+    t.datetime "created_at", null: false
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id"], name: "index_training_plans_on_academy_id"
+    t.index ["category_id"], name: "index_training_plans_on_category_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address", null: false
@@ -192,7 +311,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_231403) do
     t.index ["superadmin"], name: "index_users_on_superadmin", where: "(superadmin = true)"
   end
 
+  add_foreign_key "announcements", "academies"
+  add_foreign_key "announcements", "categories"
+  add_foreign_key "attendance_records", "academies"
+  add_foreign_key "attendance_records", "players"
+  add_foreign_key "attendance_records", "practice_sessions"
+  add_foreign_key "categories", "academies"
+  add_foreign_key "categories", "sport_schools"
+  add_foreign_key "category_enrollments", "academies"
+  add_foreign_key "category_enrollments", "categories"
+  add_foreign_key "category_enrollments", "players"
+  add_foreign_key "coach_assignments", "academies"
+  add_foreign_key "coach_assignments", "categories"
+  add_foreign_key "coach_assignments", "employees"
   add_foreign_key "employees", "academies"
+  add_foreign_key "employees", "users"
   add_foreign_key "income_expenses", "academies"
   add_foreign_key "inventory_items", "academies"
   add_foreign_key "invitations", "academies"
@@ -200,8 +333,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_231403) do
   add_foreign_key "memberships", "academies"
   add_foreign_key "memberships", "users"
   add_foreign_key "player_payments", "academies"
+  add_foreign_key "players", "academies"
+  add_foreign_key "practice_sessions", "academies"
+  add_foreign_key "practice_sessions", "categories"
   add_foreign_key "salaries", "academies"
   add_foreign_key "salaries", "employees"
   add_foreign_key "sessions", "users"
+  add_foreign_key "sport_schools", "academies"
   add_foreign_key "tax_permits", "academies"
+  add_foreign_key "training_plans", "academies"
+  add_foreign_key "training_plans", "categories"
 end

@@ -67,6 +67,117 @@ ActsAsTenant.with_tenant(academy) do
 
   puts "  Employees: #{Employee.where(academy: academy).count}"
 
+  # ── School pillar (Phase 4) ──────────────────────────────────
+  # Link the member login to an Employee so coach scoping works.
+  coach_user = User.find_by(email_address: "coach@galicia.com")
+  head_coach.update!(user: coach_user) if coach_user && head_coach.user_id != coach_user.id
+
+  sport_school = SportSchool.find_or_create_by!(academy: academy, sport_type: academy.sport_type) do |s|
+    s.name = "#{academy.name} — #{academy.sport_type.to_s.titleize}"
+  end
+
+  u12 = Category.find_or_create_by!(academy: academy, sport_school: sport_school, name: "U12") do |c|
+    c.min_age = 10
+    c.max_age = 12
+  end
+
+  u14 = Category.find_or_create_by!(academy: academy, sport_school: sport_school, name: "U14") do |c|
+    c.min_age = 13
+    c.max_age = 14
+  end
+
+  CoachAssignment.find_or_create_by!(academy: academy, category: u12, employee: head_coach) { |ca| ca.role = :head }
+  CoachAssignment.find_or_create_by!(academy: academy, category: u12, employee: asst_coach) { |ca| ca.role = :assistant }
+  CoachAssignment.find_or_create_by!(academy: academy, category: u14, employee: head_coach) { |ca| ca.role = :head }
+
+  players = [
+    { first_name: "Alejandro", last_name: "Pérez",      birth_date: 11.years.ago.to_date, guardian_name: "María Pérez",     guardian_phone: "+34 600 000 001" },
+    { first_name: "Lucía",     last_name: "Martínez",   birth_date: 12.years.ago.to_date, guardian_name: "Carlos Martínez", guardian_phone: "+34 600 000 002" },
+    { first_name: "Diego",     last_name: "Rodríguez",  birth_date: 13.years.ago.to_date, guardian_name: "Sofía Rodríguez", guardian_phone: "+34 600 000 003" },
+    { first_name: "Sara",      last_name: "Fernández",  birth_date: 14.years.ago.to_date, guardian_name: "Javier Fernández",guardian_phone: "+34 600 000 004" },
+  ].map do |attrs|
+    Player.find_or_create_by!(academy: academy, first_name: attrs[:first_name], last_name: attrs[:last_name], birth_date: attrs[:birth_date]) do |p|
+      p.guardian_name  = attrs[:guardian_name]
+      p.guardian_phone = attrs[:guardian_phone]
+    end
+  end
+
+  # Enroll two players in each category (for demo).
+  players.first(2).each do |player|
+    CategoryEnrollment.find_or_create_by!(academy: academy, category: u12, player: player) do |e|
+      e.status = :active
+      e.starts_on = Date.current.beginning_of_year
+    end
+  end
+
+  players.last(2).each do |player|
+    CategoryEnrollment.find_or_create_by!(academy: academy, category: u14, player: player) do |e|
+      e.status = :active
+      e.starts_on = Date.current.beginning_of_year
+    end
+  end
+
+  # Sessions + attendance
+  u12_session = PracticeSession.find_or_create_by!(academy: academy, category: u12, starts_at: 2.days.from_now.change(hour: 18, min: 0)) do |ps|
+    ps.ends_at  = ps.starts_at + 90.minutes
+    ps.location = "Municipal Field #1"
+    ps.notes    = "Warm-up + passing drills + small-sided game."
+  end
+
+  u14_session = PracticeSession.find_or_create_by!(academy: academy, category: u14, starts_at: 3.days.from_now.change(hour: 19, min: 0)) do |ps|
+    ps.ends_at  = ps.starts_at + 90.minutes
+    ps.location = "Municipal Field #2"
+    ps.notes    = "Pressing patterns + finishing."
+  end
+
+  u12.players.each do |player|
+    AttendanceRecord.find_or_create_by!(academy: academy, practice_session: u12_session, player: player) do |ar|
+      ar.status = :present
+    end
+  end
+
+  u14.players.each do |player|
+    AttendanceRecord.find_or_create_by!(academy: academy, practice_session: u14_session, player: player) do |ar|
+      ar.status = player.last_name == "Fernández" ? :late : :present
+      ar.notes  = "Traffic" if ar.status_late?
+    end
+  end
+
+  # Training plans
+  TrainingPlan.find_or_create_by!(academy: academy, category: u12, title: "U12 — Ball mastery week") do |tp|
+    tp.body = "Focus: 1v1 confidence, first touch, and short passing combos."
+  end
+
+  TrainingPlan.find_or_create_by!(academy: academy, category: u14, title: "U14 — Press & transition") do |tp|
+    tp.body = "Focus: pressing triggers, compactness, and quick counters."
+  end
+
+  # Communication board
+  Announcement.find_or_create_by!(academy: academy, category: nil, title: "Academy-wide: Schedule reminder") do |a|
+    a.body = "Please check the School → Practice sessions page for updates. Sessions may move due to weather."
+    a.published_at = Time.current
+  end
+
+  Announcement.find_or_create_by!(academy: academy, category: u12, title: "U12: Welcome!") do |a|
+    a.body = "Please arrive 10 minutes early to every practice. Bring water and shin guards."
+    a.published_at = Time.current
+  end
+
+  Announcement.find_or_create_by!(academy: academy, category: u14, title: "U14: Match prep") do |a|
+    a.body = "Bring both training and match kits this week. We’ll do set pieces at the end."
+    a.published_at = Time.current
+  end
+
+  puts "  Sport schools: #{SportSchool.where(academy: academy).count}"
+  puts "  Categories: #{Category.where(academy: academy).count}"
+  puts "  Players: #{Player.where(academy: academy).count}"
+  puts "  Enrollments: #{CategoryEnrollment.where(academy: academy).count}"
+  puts "  Coach assignments: #{CoachAssignment.where(academy: academy).count}"
+  puts "  Practice sessions: #{PracticeSession.where(academy: academy).count}"
+  puts "  Attendance records: #{AttendanceRecord.where(academy: academy).count}"
+  puts "  Training plans: #{TrainingPlan.where(academy: academy).count}"
+  puts "  Announcements: #{Announcement.where(academy: academy).count}"
+
   # ── Salaries — last 2 months ─────────────────────────────────
   [academy].each do
     [head_coach, asst_coach, staff].each do |emp|
@@ -188,6 +299,17 @@ owner2 = User.find_or_create_by!(email_address: "owner@porto.com") do |u|
   u.full_name = "João Ferreira"
 end
 Membership.find_or_create_by!(academy: academy2, user: owner2) { |m| m.role = :owner }
+
+ActsAsTenant.with_tenant(academy2) do
+  futsal_school = SportSchool.find_or_create_by!(academy: academy2, sport_type: academy2.sport_type) do |s|
+    s.name = "#{academy2.name} — #{academy2.sport_type.to_s.titleize}"
+  end
+
+  Category.find_or_create_by!(academy: academy2, sport_school: futsal_school, name: "U10") do |c|
+    c.min_age = 8
+    c.max_age = 10
+  end
+end
 
 puts "\n  porto.lvh.me:3000"
 puts "  owner@porto.com / password123  (owner)"

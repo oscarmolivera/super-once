@@ -65,6 +65,16 @@ Rails.application.routes.draw do
 
     namespace :school do
       root "dashboard#index"
+
+      resources :categories
+      resources :players
+      resources :practice_sessions do
+        member do
+          get  :attendance
+          patch :attendance
+        end
+      end
+      resources :announcements
     end
 
     namespace :club do

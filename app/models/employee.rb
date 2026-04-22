@@ -2,7 +2,10 @@ class Employee < ApplicationRecord
   acts_as_tenant(:academy)
 
   belongs_to :academy
+  belongs_to :user, optional: true
   has_many   :salaries, dependent: :destroy
+  has_many   :coach_assignments, dependent: :destroy
+  has_many   :categories, through: :coach_assignments
 
   # ── Enums ──────────────────────────────────────────────────────
   enum :employee_type, {
