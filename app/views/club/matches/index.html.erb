@@ -1,0 +1,37 @@
+<% content_for :title, "Matches" %>
+
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold text-gray-900">Matches</h1>
+    <%= link_to "New match", new_club_match_path, class: "rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
+  </div>
+
+  <div class="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100">
+    <% @matches.each do |m| %>
+      <div class="p-4 flex items-center gap-3">
+        <div>
+          <div class="text-sm font-medium text-gray-900">
+            <%= link_to "#{m.cup_team.name} vs #{m.opponent_name}", club_match_path(m), class: "hover:underline" %>
+          </div>
+          <div class="text-xs text-gray-500">
+            <%= m.tournament.display_name %>
+            <span class="text-gray-400">·</span>
+            <%= l(m.starts_at, format: :long) %>
+            <% if m.status_played? && m.home_score.present? && m.away_score.present? %>
+              <span class="text-gray-400">·</span>
+              <span class="text-gray-700"><%= m.home_score %>–<%= m.away_score %></span>
+            <% end %>
+          </div>
+        </div>
+        <div class="ml-auto">
+          <%= link_to "Edit", edit_club_match_path(m), class: "text-sm text-indigo-600 hover:text-indigo-700" if policy(m).edit? %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @matches.empty? %>
+      <div class="p-6 text-sm text-gray-500">No matches yet.</div>
+    <% end %>
+  </div>
+</div>
+

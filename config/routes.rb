@@ -79,6 +79,21 @@ Rails.application.routes.draw do
 
     namespace :club do
       root "dashboard#index"
+
+      resources :cups do
+        resources :tournaments, shallow: true
+      end
+
+      resources :tournaments, only: %i[index]
+
+      resources :cup_teams do
+        member do
+          get  :roster
+          patch :roster
+        end
+      end
+
+      resources :matches
     end
   end
 

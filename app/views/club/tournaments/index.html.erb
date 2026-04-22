@@ -1,0 +1,29 @@
+<% content_for :title, "Tournaments" %>
+
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold text-gray-900">Tournaments</h1>
+  </div>
+
+  <div class="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100">
+    <% @tournaments.each do |t| %>
+      <div class="p-4">
+        <div class="text-sm font-medium text-gray-900">
+          <%= link_to "#{t.cup.name} — #{t.year}", club_tournament_path(t), class: "hover:underline" %>
+        </div>
+        <div class="text-xs text-gray-500">
+          <%= t.location.presence || "—" %>
+          <% if t.starts_on || t.ends_on %>
+            <span class="text-gray-400">·</span>
+            <%= [t.starts_on, t.ends_on].compact.join(" → ") %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @tournaments.empty? %>
+      <div class="p-6 text-sm text-gray-500">No tournaments yet.</div>
+    <% end %>
+  </div>
+</div>
+

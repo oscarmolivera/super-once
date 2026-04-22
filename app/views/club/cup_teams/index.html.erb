@@ -1,0 +1,33 @@
+<% content_for :title, "Squads" %>
+
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold text-gray-900">Squads</h1>
+    <%= link_to "Register squad", new_club_cup_team_path, class: "rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
+  </div>
+
+  <div class="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100">
+    <% @cup_teams.each do |team| %>
+      <div class="p-4 flex items-center gap-3">
+        <div>
+          <div class="text-sm font-medium text-gray-900">
+            <%= link_to team.name, club_cup_team_path(team), class: "hover:underline" %>
+          </div>
+          <div class="text-xs text-gray-500">
+            <%= team.tournament.cup.name %> — <%= team.tournament.year %>
+            <span class="text-gray-400">·</span>
+            <%= team.category.name %>
+          </div>
+        </div>
+        <div class="ml-auto">
+          <%= link_to "Roster", roster_club_cup_team_path(team), class: "text-sm text-indigo-600 hover:text-indigo-700" if policy(team).roster_edit? %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @cup_teams.empty? %>
+      <div class="p-6 text-sm text-gray-500">No squads yet.</div>
+    <% end %>
+  </div>
+</div>
+
