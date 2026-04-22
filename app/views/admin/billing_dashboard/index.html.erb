@@ -1,0 +1,134 @@
+<div class="space-y-8">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900">Billing Dashboard</h1>
+    <p class="text-gray-600 mt-2">Revenue, subscriptions, and trial analytics</p>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <!-- Total MRR -->
+    <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+      <p class="text-sm font-medium text-gray-600 mb-2">Monthly Recurring Revenue (MRR)</p>
+      <p class="text-3xl font-bold text-gray-900">${{ @total_mrr.round(2) }}</p>
+      <p class="text-sm text-gray-500 mt-2">
+        <% if @mrr_growth >= 0 %>
+          <span class="text-green-600">↑ <%= @mrr_growth %>%</span>
+        <% else %>
+          <span class="text-red-600">↓ <%= @mrr_growth %>%</span>
+        <% end %>
+        vs last month
+      </p>
+    </div>
+
+    <!-- Annual Run Rate -->
+    <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+      <p class="text-sm font-medium text-gray-600 mb-2">Annual Run Rate (ARR)</p>
+      <p class="text-3xl font-bold text-gray-900">${{ @total_arr.round(2) }}</p>
+      <p class="text-sm text-gray-500 mt-2">Projected annual revenue</p>
+    </div>
+
+    <!-- Active Subscriptions -->
+    <div class="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500">
+      <p class="text-sm font-medium text-gray-600 mb-2">Active Subscriptions</p>
+      <p class="text-3xl font-bold text-gray-900"><%= @active_subscriptions %></p>
+      <p class="text-sm text-gray-500 mt-2"><%= @trial_subscriptions %> on trial</p>
+    </div>
+
+    <!-- Churn Rate -->
+    <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+      <p class="text-sm font-medium text-gray-600 mb-2">Monthly Churn Rate</p>
+      <p class="text-3xl font-bold text-gray-900"><%= @churn_rate %>%</p>
+      <p class="text-sm text-gray-500 mt-2"><%= @canceled_subscriptions %> canceled subscriptions</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Plan Distribution -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-lg font-semibold mb-4">Plan Distribution</h3>
+      <div class="space-y-3">
+        <% @plan_distribution.each do |plan_name, count| %>
+          <div>
+            <div class="flex justify-between mb-1">
+              <p class="text-sm font-medium text-gray-700"><%= plan_name %></p>
+              <p class="text-sm font-medium text-gray-900"><%= count %></p>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-indigo-600 h-2 rounded-full" style="width: <%= (count.to_f / @active_subscriptions * 100) %>%"></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Subscription Status -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-lg font-semibold mb-4">Subscription Status</h3>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <p class="text-gray-600">Active</p>
+          <p class="text-xl font-bold text-green-600"><%= @active_subscriptions %></p>
+        </div>
+        <div class="flex items-center justify-between">
+          <p class="text-gray-600">On Trial</p>
+          <p class="text-xl font-bold text-blue-600"><%= @trial_subscriptions %></p>
+        </div>
+        <div class="flex items-center justify-between">
+          <p class="text-gray-600">Canceled</p>
+          <p class="text-xl font-bold text-red-600"><%= @canceled_subscriptions %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+      <div class="space-y-2">
+        <%= link_to "View All Subscriptions", admin_billing_subscriptions_path, class: "block w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-center text-sm font-medium" %>
+        <%= link_to "Analytics", admin_billing_analytics_path, class: "block w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-center text-sm font-medium" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expiring Trials Alert -->
+  <% if @expiring_trials.any? %>
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+      <h3 class="font-semibold text-yellow-900 mb-4">Expiring Trials (Next 3 Days)</h3>
+      <div class="space-y-3">
+        <% @expiring_trials.limit(5).each do |sub| %>
+          <div class="flex items-center justify-between py-2 border-b border-yellow-200">
+            <div>
+              <p class="font-medium text-gray-900"><%= sub.academy.name %></p>
+              <p class="text-sm text-gray-600"><%= sub.plan.name %> plan</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-medium text-gray-900"><%= sub.trial_days_remaining %> days left</p>
+              <p class="text-xs text-gray-500">Expires <%= sub.trial_ends_at.strftime('%b %d') %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Recent Signups -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-lg font-semibold mb-4">Recent Signups</h3>
+    <div class="space-y-3">
+      <% @recent_signups.each do |sub| %>
+        <div class="flex items-center justify-between py-3 border-b border-gray-200">
+          <div>
+            <p class="font-medium text-gray-900"><%= sub.academy.name %></p>
+            <p class="text-sm text-gray-600"><%= sub.plan.name %> plan</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-medium"><%= sub.created_at.strftime('%b %d, %Y') %></p>
+            <p class="text-xs <%= 'text-blue-600' if sub.trialing? %><%= 'text-green-600' if sub.active? %>">
+              <%= sub.trialing? ? 'On Trial' : 'Active' %>
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

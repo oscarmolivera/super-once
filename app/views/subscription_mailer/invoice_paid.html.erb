@@ -1,0 +1,23 @@
+<!-- Email for invoice paid -->
+<div style="font-family: sans-serif; color: #333;">
+  <h2>Payment Received</h2>
+
+  <p>Hi <%= @academy.owner.email_address %>,</p>
+
+  <p>Thank you! We've received your payment for SuperOnce.</p>
+
+  <h3>Invoice Details:</h3>
+  <ul>
+    <li>Amount: $<%= @amount %></li>
+    <li>Date: <%= @date %></li>
+    <li>Plan: <%= @subscription.plan.name %></li>
+  </ul>
+
+  <p>Your subscription is active and will continue to <%= @subscription.current_period_end.strftime('%B %d, %Y') %>.</p>
+
+  <p>
+    <%= link_to "View Billing", academy_billing_url(subdomain: @academy.slug), style: "display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 6px;" %>
+  </p>
+
+  <p>Need help? <%= link_to "Contact support", contact_url %></p>
+</div>

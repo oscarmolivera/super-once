@@ -1,0 +1,137 @@
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-3xl font-bold mb-8">Billing & Subscription</h1>
+
+  <!-- Trial Banner -->
+  <% if on_trial? %>
+    <div class="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <p class="text-sm text-blue-800">
+        <strong>Free Trial:</strong> You have <strong><%= trial_days_remaining %> days</strong> remaining in your free trial.
+        <% if trial_expiring_soon? %>
+          <strong>Your trial is expiring soon!</strong>
+        <% end %>
+      </p>
+      <%= link_to "Upgrade Now", academy_billing_checkout_path(plan_id: Plan.where(tier: 'starter').first.id), class: "mt-2 inline-block text-blue-600 hover:text-blue-800 font-medium" %>
+    </div>
+  <% end %>
+
+  <!-- Current Plan -->
+  <div class="mb-8 border border-gray-200 rounded-lg p-6">
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-semibold mb-2">Current Plan</h2>
+        <p class="text-3xl font-bold capitalize mb-2"><%= @subscription.plan.name %></p>
+        <% if @subscription.plan.free? %>
+          <p class="text-gray-600">Limited features. Upgrade to unlock more.</p>
+        <% else %>
+          <p class="text-lg font-semibold text-gray-900">
+            $<%= @subscription.plan.price_amount %><span class="text-sm text-gray-600">/month</span>
+          </p>
+          <p class="text-sm text-gray-500 mt-2">
+            Next billing date: <%= @subscription.current_period_end.strftime('%B %d, %Y') %>
+          </p>
+        <% end %>
+      </div>
+
+      <% if @subscription.active? %>
+        <div class="flex gap-2">
+          <%= link_to "Manage Billing", academy_billing_portal_path, method: :post, class: "px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700" %>
+          <% unless @subscription.plan.pro? %>
+            <%= link_to "Upgrade", "#upgrade-section", class: "px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700" %>
+          <% end %>
+        </div>
+      <% elsif @subscription.canceled? %>
+        <div>
+          <p class="text-sm text-gray-600 mb-2">Subscription canceled on <%= @subscription.canceled_at.strftime('%B %d, %Y') %></p>
+          <%= link_to "Reactivate", academy_billing_reactivate_path, method: :post, class: "px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Plan Features -->
+    <div class="border-t pt-6">
+      <h3 class="font-semibold mb-4">Included Features</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <% @subscription.plan.features_array.each do |feature| %>
+          <div class="flex items-center">
+            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-sm text-gray-700"><%= feature %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plan Comparison -->
+  <% unless @subscription.plan.pro? %>
+    <div id="upgrade-section" class="mb-8">
+      <h2 class="text-xl font-semibold mb-6">Upgrade Your Plan</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <% @plans.each do |plan| %>
+          <% next if plan.id == @subscription.plan.id %>
+          <div class="border-2 <%= plan.tier.to_s == @subscription.plan.tier ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200' %> rounded-lg p-6">
+            <h3 class="text-lg font-semibold capitalize mb-2"><%= plan.name %></h3>
+            <p class="text-2xl font-bold mb-4">
+              $<%= plan.price_amount %><span class="text-sm text-gray-600">/month</span>
+            </p>
+
+            <div class="space-y-2 mb-6 border-t border-b py-4">
+              <% plan.features_array.each do |feature| %>
+                <div class="flex items-center text-sm">
+                  <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  <%= feature %>
+                </div>
+              <% end %>
+            </div>
+
+            <%= link_to "Upgrade", academy_billing_checkout_path(plan_id: plan.id), method: :post, class: "w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-center" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Danger Zone -->
+  <div class="border-2 border-red-200 bg-red-50 rounded-lg p-6">
+    <h3 class="text-lg font-semibold text-red-900 mb-4">Danger Zone</h3>
+    <p class="text-sm text-red-700 mb-4">
+      Canceling your subscription will stop charges, but your academy data will remain. You can reactivate anytime.
+    </p>
+    <% if @subscription.active? && !@subscription.plan.free? %>
+      <button type="button" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700" data-action="click->cancel-subscription#open">
+        Cancel Subscription
+      </button>
+    <% end %>
+  </div>
+
+  <!-- Cancel Modal -->
+  <div id="cancel-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-8 max-w-md">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Cancel Subscription?</h3>
+      <p class="text-gray-600 mb-6">Your academy will downgrade to the Free plan at the end of this billing cycle.</p>
+
+      <%= form_with url: academy_billing_cancel_path, method: :post, local: true, class: "space-y-4" do |f| %>
+        <div>
+          <%= f.label :reason, "Reason for cancellation (optional)" %>
+          <%= f.text_area :reason, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500", rows: 3 %>
+        </div>
+
+        <div class="flex gap-4">
+          <button type="button" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50" data-action="click->cancel-subscription#close">
+            Keep Subscription
+          </button>
+          <%= f.submit "Cancel", class: "flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('controller:cancel-subscription', function() {
+    document.getElementById('cancel-modal').classList.remove('hidden');
+  });
+</script>

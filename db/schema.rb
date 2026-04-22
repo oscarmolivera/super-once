@@ -10,9 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_22_162613) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_22_184717) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  # Custom types defined in this database.
+  # Note that some types may not work with other database engines. Be careful if changing database.
+  create_enum "billing_cycle_type", ["monthly", "annual"]
+  create_enum "plan_tier", ["free", "starter", "pro"]
+  create_enum "subscription_status", ["active", "paused", "canceled", "past_due"]
 
   create_table "academies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "city"
@@ -234,6 +240,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_22_162613) do
     t.index ["user_id"], name: "index_memberships_on_user_id"
   end
 
+  create_table "plans", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.text "features"
+    t.integer "monthly_cost_cents", default: 0, null: false
+    t.string "name", null: false
+    t.integer "price_cents", default: 0, null: false
+    t.string "stripe_price_id"
+    t.string "stripe_product_id"
+    t.enum "tier", default: "free", null: false, enum_type: "plan_tier"
+    t.integer "trial_days", default: 14, null: false
+    t.datetime "updated_at", null: false
+    t.boolean "visible", default: true, null: false
+    t.index ["name"], name: "index_plans_on_name", unique: true
+    t.index ["stripe_product_id"], name: "index_plans_on_stripe_product_id", unique: true
+    t.index ["tier"], name: "index_plans_on_tier", unique: true
+  end
+
   create_table "player_payments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "academy_id", null: false
     t.decimal "amount", precision: 10, scale: 2, null: false
@@ -314,6 +338,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_22_162613) do
     t.string "sport_type"
     t.datetime "updated_at", null: false
     t.index ["academy_id"], name: "index_sport_schools_on_academy_id"
+  end
+
+  create_table "subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.enum "billing_cycle", default: "monthly", null: false, enum_type: "billing_cycle_type"
+    t.datetime "canceled_at"
+    t.text "cancellation_reason"
+    t.datetime "created_at", null: false
+    t.datetime "current_period_end"
+    t.datetime "current_period_start"
+    t.uuid "plan_id", null: false
+    t.enum "status", default: "active", null: false, enum_type: "subscription_status"
+    t.string "stripe_customer_id"
+    t.string "stripe_subscription_id"
+    t.datetime "trial_ends_at"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "status"], name: "index_subscriptions_on_academy_id_and_status"
+    t.index ["academy_id"], name: "index_subscriptions_on_academy_id"
+    t.index ["plan_id"], name: "index_subscriptions_on_plan_id"
+    t.index ["stripe_subscription_id"], name: "index_subscriptions_on_stripe_subscription_id", unique: true
   end
 
   create_table "tax_permits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -421,6 +465,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_22_162613) do
   add_foreign_key "salaries", "employees"
   add_foreign_key "sessions", "users"
   add_foreign_key "sport_schools", "academies"
+  add_foreign_key "subscriptions", "academies"
+  add_foreign_key "subscriptions", "plans"
   add_foreign_key "tax_permits", "academies"
   add_foreign_key "team_players", "academies"
   add_foreign_key "team_players", "cup_teams"

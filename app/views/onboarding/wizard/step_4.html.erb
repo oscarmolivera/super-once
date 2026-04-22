@@ -1,0 +1,59 @@
+<h2 class="text-2xl font-bold mb-6">Create Your Account</h2>
+
+<%= form_with model: @form, url: onboarding_step_4_path, method: :post, class: "space-y-6" do |f| %>
+  <% if @form.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-red-800 mb-2">
+        <%= pluralize(@form.errors.count, 'error') %> prevented saving:
+      </h3>
+      <ul class="list-disc pl-5 text-sm text-red-700">
+        <% @form.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <p class="text-gray-600 mb-6">This will be the first account in your academy</p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :first_name %>
+      <%= f.text_field :first_name,
+          class: "mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent",
+          placeholder: "John" %>
+    </div>
+
+    <div>
+      <%= f.label :last_name %>
+      <%= f.text_field :last_name,
+          class: "mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent",
+          placeholder: "Doe" %>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :email %>
+    <%= f.email_field :email,
+        class: "mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent",
+        placeholder: "john@example.com" %>
+  </div>
+
+  <div>
+    <%= f.label :password %>
+    <%= f.password_field :password,
+        class: "mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+    <p class="mt-1 text-sm text-gray-500">Minimum 8 characters</p>
+  </div>
+
+  <div>
+    <%= f.label :password_confirmation %>
+    <%= f.password_field :password_confirmation,
+        class: "mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" %>
+  </div>
+
+  <div class="flex gap-4 pt-6">
+    <%= link_to "Back", onboarding_step_3_path, class: "px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50" %>
+    <%= f.submit "Review", class: "flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700" %>
+  </div>
+<% end %>

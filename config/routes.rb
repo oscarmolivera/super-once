@@ -7,6 +7,22 @@ Rails.application.routes.draw do
     get "about",   to: "pages#about"
     get "pricing", to: "pages#pricing"
     get "contact", to: "pages#contact"
+
+    # ── Onboarding flow ──────────────────────────
+    namespace :onboarding do
+      get  "start",          to: "wizard#start",              as: :start
+      get  "step_1",         to: "wizard#step_1",             as: :step_1
+      post "step_1",         to: "wizard#step_1"
+      get  "step_2",         to: "wizard#step_2",             as: :step_2
+      post "step_2",         to: "wizard#step_2"
+      get  "step_3",         to: "wizard#step_3",             as: :step_3
+      post "step_3",         to: "wizard#step_3"
+      get  "step_3/checkout", to: "wizard#step_3_checkout",   as: :step_3_checkout
+      get  "step_4",         to: "wizard#step_4",             as: :step_4
+      post "step_4",         to: "wizard#step_4"
+      get  "step_5",         to: "wizard#step_5",             as: :step_5
+      post "create_academy", to: "wizard#create_academy",     as: :create_academy
+    end
   end
 
   # ─────────────────────────────────────────────
@@ -17,6 +33,14 @@ Rails.application.routes.draw do
       resources :academies
       resources :users
       resources :memberships
+      resource  :session
+      resources :passwords, param: :token
+
+      # ── Billing Dashboard ────────────────────────────
+      get  "billing",              to: "billing_dashboard#index",        as: :billing
+      get  "billing/subscriptions", to: "billing_dashboard#subscriptions", as: :billing_subscriptions
+      get  "billing/analytics",    to: "billing_dashboard#analytics",    as: :billing_analytics
+
       root to: "academies#index"
     end
   end
@@ -95,6 +119,26 @@ Rails.application.routes.draw do
 
       resources :matches
     end
+
+    # ── Billing (Academy) ────────────────────────────────────
+    namespace :academy do
+      resource :billing, only: %i[show] do
+        member do
+          post :checkout
+          get  :checkout_success, as: :success
+          post :customer_portal
+          post :cancel
+          post :reactivate
+        end
+      end
+    end
+  end
+
+  # ─────────────────────────────────────────────
+  # Stripe Webhooks
+  # ─────────────────────────────────────────────
+  namespace :stripe do
+    post "webhooks", to: "webhooks#create", as: :webhooks
   end
 
   get "up" => "rails/health#show", as: :rails_health_check

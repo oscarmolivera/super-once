@@ -1,0 +1,40 @@
+<h2 class="text-2xl font-bold mb-6">Academy Details</h2>
+
+<%= form_with model: @form, url: onboarding_step_1_path, method: :post, class: "space-y-6" do |f| %>
+  <% if @form.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-red-800 mb-2">
+        <%= pluralize(@form.errors.count, 'error') %> prevented saving:
+      </h3>
+      <ul class="list-disc pl-5 text-sm text-red-700">
+        <% @form.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :academy_name, "Academy Name" %>
+    <%= f.text_field :academy_name,
+        class: "mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent",
+        placeholder: "e.g., Downtown Soccer Academy" %>
+  </div>
+
+  <div>
+    <%= f.label :slug, "Subdomain (URL)" %>
+    <div class="mt-1 flex items-center">
+      <span class="text-gray-600 mr-2">https://</span>
+      <%= f.text_field :slug,
+          class: "flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent",
+          placeholder: "academy-slug" %>
+      <span class="text-gray-600 ml-2">.nubbe.net</span>
+    </div>
+    <p class="mt-1 text-sm text-gray-500">Use lowercase letters, numbers, and hyphens only</p>
+  </div>
+
+  <div class="flex gap-4 pt-6">
+    <%= link_to "Back", onboarding_start_path, class: "px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50" %>
+    <%= f.submit "Next", class: "flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700" %>
+  </div>
+<% end %>

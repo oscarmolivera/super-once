@@ -1,0 +1,82 @@
+<h2 class="text-2xl font-bold mb-6">Review Your Setup</h2>
+
+<div class="space-y-6">
+  <!-- Academy Info -->
+  <div class="border border-gray-200 rounded-lg p-6">
+    <h3 class="text-lg font-semibold mb-4">Academy Details</h3>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <p class="text-gray-600">Name</p>
+        <p class="font-medium text-gray-900"><%= @onboarding_data[:academy_name] %></p>
+      </div>
+      <div>
+        <p class="text-gray-600">Subdomain</p>
+        <p class="font-medium text-gray-900"><%= @onboarding_data[:slug] %>.nubbe.net</p>
+      </div>
+      <div>
+        <p class="text-gray-600">Sport</p>
+        <p class="font-medium text-gray-900 capitalize"><%= @onboarding_data[:sport] %></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plan Info -->
+  <div class="border border-gray-200 rounded-lg p-6">
+    <h3 class="text-lg font-semibold mb-4">Plan</h3>
+    <% plan = Plan.find(@onboarding_data[:plan_id]) %>
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-gray-600 text-sm">Selected Plan</p>
+        <p class="font-medium text-gray-900 text-lg capitalize"><%= plan.name %></p>
+        <% unless plan.free? %>
+          <p class="text-gray-600 text-sm mt-1"><%= plan.trial_days %> day free trial</p>
+        <% end %>
+      </div>
+      <div class="text-right">
+        <p class="text-3xl font-bold text-indigo-600">
+          <% if plan.free? %>
+            Free
+          <% else %>
+            $<%= plan.price_amount %>
+          <% end %>
+        </p>
+        <% unless plan.free? %>
+          <p class="text-gray-600 text-sm">/month after trial</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Info -->
+  <div class="border border-gray-200 rounded-lg p-6">
+    <h3 class="text-lg font-semibold mb-4">Account Owner</h3>
+    <div class="space-y-2 text-sm">
+      <div>
+        <p class="text-gray-600">Name</p>
+        <p class="font-medium text-gray-900"><%= @onboarding_data[:first_name] %> <%= @onboarding_data[:last_name] %></p>
+      </div>
+      <div>
+        <p class="text-gray-600">Email</p>
+        <p class="font-medium text-gray-900"><%= @onboarding_data[:email] %></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <p class="text-sm text-gray-700">
+      By clicking "Create Academy", you agree to our Terms of Service and acknowledge our Privacy Policy.
+      <% unless Plan.find(@onboarding_data[:plan_id]).free? %>
+        Your card will not be charged during the free trial period.
+      <% end %>
+    </p>
+  </div>
+
+  <div class="flex gap-4 pt-6">
+    <%= link_to "Back", onboarding_step_4_path, class: "px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50" %>
+
+    <%= form_with url: onboarding_create_academy_path, method: :post, class: "flex-1" do |f| %>
+      <%= f.submit "Create Academy", class: "w-full px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700" %>
+    <% end %>
+  </div>
+</div>

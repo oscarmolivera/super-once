@@ -1,0 +1,18 @@
+<!-- Email for trial expiring soon -->
+<div style="font-family: sans-serif; color: #333;">
+  <h2>Your Trial is Expiring Soon</h2>
+
+  <p>Hi <%= @academy.owner.email_address %>,</p>
+
+  <p>Your <strong><%= @plan.name %> plan</strong> trial expires in <strong><%= @days_remaining %> days</strong>.</p>
+
+  <p>Once your trial ends, your academy will revert to the Free plan with limited features.</p>
+
+  <h3>Upgrade now to keep all features:</h3>
+
+  <p>
+    <%= link_to "Upgrade to #{@plan.name}", academy_billing_url(subdomain: @academy.slug), style: "display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 6px;" %>
+  </p>
+
+  <p>Questions? <%= link_to "Contact support", contact_url %></p>
+</div>

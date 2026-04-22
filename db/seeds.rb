@@ -4,6 +4,9 @@
 
 puts "Seeding SuperOnce..."
 
+puts "Creating plans first..."
+load(Rails.root.join("db/seeds/plans.rb"))
+
 # ── Superadmin ──────────────────────────────────────────────────
 superadmin = User.find_or_create_by!(email_address: "admin@nubbe.net") do |u|
   u.password   = "password123"
@@ -15,7 +18,7 @@ puts "  Superadmin: #{superadmin.email_address}"
 # ── Academy 1: Galicia Soccer Academy ───────────────────────────
 academy = Academy.find_or_create_by!(slug: "galicia") do |a|
   a.name          = "Galicia Soccer Academy"
-  a.plan          = :starter
+  a.plan          = Plan.find_by(tier: 'starter')
   a.status        = :active
   a.sport_type    = "soccer"
   a.description   = "The leading youth soccer academy in Galicia. Developing talent since 2010."
@@ -329,7 +332,7 @@ puts "  coach@galicia.com / password123  (member)"
 # ── Academy 2: Porto Futsal Club ────────────────────────────────
 academy2 = Academy.find_or_create_by!(slug: "porto") do |a|
   a.name          = "Porto Futsal Club"
-  a.plan          = :free
+  a.plan          = Plan.find_by(tier: 'pro')
   a.status        = :trial
   a.sport_type    = "futsal"
   a.description   = "Elite futsal training for players aged 6-18."
