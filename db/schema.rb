@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_22_125815) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_22_162613) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -103,6 +103,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_22_125815) do
     t.index ["employee_id"], name: "index_coach_assignments_on_employee_id"
   end
 
+  create_table "cup_teams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.uuid "category_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.uuid "tournament_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "tournament_id", "category_id"], name: "idx_on_academy_id_tournament_id_category_id_cf8e40a584", unique: true
+    t.index ["academy_id"], name: "index_cup_teams_on_academy_id"
+    t.index ["category_id"], name: "index_cup_teams_on_category_id"
+    t.index ["tournament_id"], name: "index_cup_teams_on_tournament_id"
+  end
+
+  create_table "cups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.string "organizer"
+    t.boolean "recurring", default: true, null: false
+    t.string "sport_type"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "sport_type", "name"], name: "index_cups_on_academy_id_and_sport_type_and_name", unique: true
+    t.index ["academy_id"], name: "index_cups_on_academy_id"
+  end
+
   create_table "employees", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "academy_id", null: false
     t.decimal "base_salary", precision: 10, scale: 2, default: "0.0"
@@ -173,6 +198,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_22_125815) do
     t.index ["expires_at"], name: "index_invitations_on_expires_at"
     t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
     t.index ["token"], name: "index_invitations_on_token", unique: true
+  end
+
+  create_table "matches", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.integer "away_score"
+    t.datetime "created_at", null: false
+    t.uuid "cup_team_id", null: false
+    t.boolean "home", default: true, null: false
+    t.integer "home_score"
+    t.text "notes"
+    t.string "opponent_name"
+    t.datetime "starts_at"
+    t.integer "status", default: 0, null: false
+    t.uuid "tournament_id", null: false
+    t.datetime "updated_at", null: false
+    t.string "venue"
+    t.index ["academy_id", "tournament_id", "starts_at"], name: "index_matches_on_academy_id_and_tournament_id_and_starts_at"
+    t.index ["academy_id"], name: "index_matches_on_academy_id"
+    t.index ["cup_team_id"], name: "index_matches_on_cup_team_id"
+    t.index ["tournament_id"], name: "index_matches_on_tournament_id"
   end
 
   create_table "memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -289,6 +334,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_22_125815) do
     t.index ["academy_id"], name: "index_tax_permits_on_academy_id"
   end
 
+  create_table "team_players", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.datetime "created_at", null: false
+    t.uuid "cup_team_id", null: false
+    t.integer "jersey_number"
+    t.uuid "player_id", null: false
+    t.string "position"
+    t.datetime "updated_at", null: false
+    t.index ["academy_id", "cup_team_id", "jersey_number"], name: "idx_on_academy_id_cup_team_id_jersey_number_7f2ca91a33", unique: true, where: "(jersey_number IS NOT NULL)"
+    t.index ["academy_id", "cup_team_id", "player_id"], name: "index_team_players_on_academy_id_and_cup_team_id_and_player_id", unique: true
+    t.index ["academy_id"], name: "index_team_players_on_academy_id"
+    t.index ["cup_team_id"], name: "index_team_players_on_cup_team_id"
+    t.index ["player_id"], name: "index_team_players_on_player_id"
+  end
+
+  create_table "tournaments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "academy_id", null: false
+    t.datetime "created_at", null: false
+    t.uuid "cup_id", null: false
+    t.date "ends_on"
+    t.string "location"
+    t.date "starts_on"
+    t.datetime "updated_at", null: false
+    t.integer "year"
+    t.index ["academy_id", "cup_id", "year"], name: "index_tournaments_on_academy_id_and_cup_id_and_year", unique: true
+    t.index ["academy_id"], name: "index_tournaments_on_academy_id"
+    t.index ["cup_id"], name: "index_tournaments_on_cup_id"
+  end
+
   create_table "training_plans", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "academy_id", null: false
     t.text "body"
@@ -324,12 +398,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_22_125815) do
   add_foreign_key "coach_assignments", "academies"
   add_foreign_key "coach_assignments", "categories"
   add_foreign_key "coach_assignments", "employees"
+  add_foreign_key "cup_teams", "academies"
+  add_foreign_key "cup_teams", "categories"
+  add_foreign_key "cup_teams", "tournaments"
+  add_foreign_key "cups", "academies"
   add_foreign_key "employees", "academies"
   add_foreign_key "employees", "users"
   add_foreign_key "income_expenses", "academies"
   add_foreign_key "inventory_items", "academies"
   add_foreign_key "invitations", "academies"
   add_foreign_key "invitations", "users", column: "invited_by_id"
+  add_foreign_key "matches", "academies"
+  add_foreign_key "matches", "cup_teams"
+  add_foreign_key "matches", "tournaments"
   add_foreign_key "memberships", "academies"
   add_foreign_key "memberships", "users"
   add_foreign_key "player_payments", "academies"
@@ -341,6 +422,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_22_125815) do
   add_foreign_key "sessions", "users"
   add_foreign_key "sport_schools", "academies"
   add_foreign_key "tax_permits", "academies"
+  add_foreign_key "team_players", "academies"
+  add_foreign_key "team_players", "cup_teams"
+  add_foreign_key "team_players", "players"
+  add_foreign_key "tournaments", "academies"
+  add_foreign_key "tournaments", "cups"
   add_foreign_key "training_plans", "academies"
   add_foreign_key "training_plans", "categories"
 end

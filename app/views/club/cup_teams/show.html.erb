@@ -1,0 +1,80 @@
+<% content_for :title, @cup_team.name %>
+
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-xl font-semibold text-gray-900"><%= @cup_team.name %></h1>
+      <p class="text-sm text-gray-500">
+        <%= @cup_team.tournament.display_name %>
+        <span class="text-gray-400">·</span>
+        <%= @cup_team.category.name %>
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <% if policy(@cup_team).roster_edit? %>
+        <%= link_to "Roster", roster_club_cup_team_path(@cup_team), class: "rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
+      <% end %>
+      <% if policy(@cup_team).edit? %>
+        <%= link_to "Edit", edit_club_cup_team_path(@cup_team), class: "rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="rounded-xl border border-gray-200 bg-white p-4">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3">Roster</h2>
+      <% if @team_players.any? %>
+        <div class="divide-y divide-gray-100">
+          <% @team_players.each do |tp| %>
+            <div class="py-2 flex items-center">
+              <div class="text-sm text-gray-900">
+                <span class="font-medium"><%= tp.player.last_name %>, <%= tp.player.first_name %></span>
+                <% if tp.jersey_number.present? %>
+                  <span class="text-gray-400">·</span>
+                  <span class="text-gray-600">#<%= tp.jersey_number %></span>
+                <% end %>
+                <% if tp.position.present? %>
+                  <span class="text-gray-400">·</span>
+                  <span class="text-gray-600"><%= tp.position %></span>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-sm text-gray-500">No players selected yet.</p>
+      <% end %>
+    </div>
+
+    <div class="rounded-xl border border-gray-200 bg-white p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-gray-900">Matches</h2>
+        <%= link_to "New match", new_club_match_path(match: { tournament_id: @cup_team.tournament_id, cup_team_id: @cup_team.id }), class: "text-sm text-indigo-600 hover:text-indigo-700" if policy(Match.new(academy: current_academy, tournament: @cup_team.tournament, cup_team: @cup_team, opponent_name: "X", starts_at: Time.current)).new? %>
+      </div>
+
+      <% if @matches.any? %>
+        <div class="divide-y divide-gray-100">
+          <% @matches.each do |m| %>
+            <div class="py-2 flex items-center">
+              <div class="text-sm text-gray-900">
+                <%= link_to m.opponent_name, club_match_path(m), class: "font-medium hover:underline" %>
+                <span class="text-gray-400">·</span>
+                <%= l(m.starts_at, format: :long) %>
+                <% if m.status_played? && m.home_score.present? && m.away_score.present? %>
+                  <span class="text-gray-400">·</span>
+                  <span class="text-gray-700"><%= m.home_score %>–<%= m.away_score %></span>
+                <% end %>
+              </div>
+              <div class="ml-auto">
+                <%= link_to "Edit", edit_club_match_path(m), class: "text-sm text-indigo-600 hover:text-indigo-700" if policy(m).edit? %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-sm text-gray-500">No matches yet.</p>
+      <% end %>
+    </div>
+  </div>
+</div>
+

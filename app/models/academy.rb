@@ -24,6 +24,13 @@ class Academy < ApplicationRecord
   has_many :training_plans,       dependent: :destroy
   has_many :announcements,        dependent: :destroy
 
+  # Club pillar
+  has_many :cups,        dependent: :destroy
+  has_many :tournaments, dependent: :destroy
+  has_many :cup_teams,   dependent: :destroy
+  has_many :team_players, dependent: :destroy
+  has_many :matches,     dependent: :destroy
+
   # ── Validations ─────────────────────────────────────────────────
   validates :name, presence: true
   validates :slug,

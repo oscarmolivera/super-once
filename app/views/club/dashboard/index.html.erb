@@ -10,13 +10,56 @@
       </div>
       <h1 class="text-xl font-semibold text-gray-900">Club</h1>
     </div>
-    <p class="text-sm text-gray-500">Cups, tournaments and competitive team management. Coming in Phase 5.</p>
+    <p class="text-sm text-gray-500">Register squads, track fixtures and record results.</p>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <%= render "shared/coming_soon_card", title: "Cups",           description: "Annual competitions the academy participates in" %>
-    <%= render "shared/coming_soon_card", title: "Tournaments",    description: "Yearly editions of each cup" %>
-    <%= render "shared/coming_soon_card", title: "Cup teams",      description: "Register squads from your categories" %>
-    <%= render "shared/coming_soon_card", title: "Matches",        description: "Fixtures and results" %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+    <%= link_to club_cups_path, class: "block rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-300" do %>
+      <div class="text-sm font-medium text-gray-900">Cups</div>
+      <div class="text-sm text-gray-500 mt-1">Competitions</div>
+    <% end %>
+
+    <%= link_to club_tournaments_path, class: "block rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-300" do %>
+      <div class="text-sm font-medium text-gray-900">Tournaments</div>
+      <div class="text-sm text-gray-500 mt-1"><%= @tournaments.count %> recent</div>
+    <% end %>
+
+    <%= link_to club_cup_teams_path, class: "block rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-300" do %>
+      <div class="text-sm font-medium text-gray-900">Squads</div>
+      <div class="text-sm text-gray-500 mt-1"><%= @cup_teams.count %> recent</div>
+    <% end %>
+
+    <%= link_to club_matches_path, class: "block rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-300" do %>
+      <div class="text-sm font-medium text-gray-900">Matches</div>
+      <div class="text-sm text-gray-500 mt-1">Upcoming: <%= @upcoming_matches.count %></div>
+    <% end %>
+  </div>
+
+  <div class="rounded-xl border border-gray-200 bg-white p-4">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold text-gray-900">Upcoming matches</h2>
+      <%= link_to "New match", new_club_match_path, class: "text-sm text-indigo-600 hover:text-indigo-700" %>
+    </div>
+
+    <% if @upcoming_matches.any? %>
+      <div class="divide-y divide-gray-100">
+        <% @upcoming_matches.each do |m| %>
+          <div class="py-2 flex items-center gap-3">
+            <div class="text-sm text-gray-900">
+              <%= link_to m.cup_team.name, club_cup_team_path(m.cup_team), class: "font-medium hover:underline" %>
+              <span class="text-gray-400">vs</span>
+              <span class="font-medium"><%= m.opponent_name %></span>
+              <span class="text-gray-400">·</span>
+              <%= l(m.starts_at, format: :long) %>
+            </div>
+            <div class="ml-auto">
+              <%= link_to "Edit", edit_club_match_path(m), class: "text-sm text-indigo-600 hover:text-indigo-700" if policy(m).edit? %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-500">No upcoming matches yet.</p>
+    <% end %>
   </div>
 </div>

@@ -168,6 +168,44 @@ ActsAsTenant.with_tenant(academy) do
     a.published_at = Time.current
   end
 
+  # ── Club pillar (Phase 5) ─────────────────────────────────────
+  spring_cup = Cup.find_or_create_by!(academy: academy, sport_type: academy.sport_type, name: "Galicia Spring Cup") do |c|
+    c.organizer = "Galicia FA"
+    c.recurring = true
+  end
+
+  spring_tournament = Tournament.find_or_create_by!(academy: academy, cup: spring_cup, year: Date.current.year) do |t|
+    t.starts_on = 1.month.from_now.to_date
+    t.ends_on   = (1.month.from_now.to_date + 2.days)
+    t.location  = "Santiago de Compostela"
+  end
+
+  u12_team = CupTeam.find_or_create_by!(academy: academy, tournament: spring_tournament, category: u12) do |ct|
+    ct.name = "U12 — Spring Cup #{spring_tournament.year}"
+  end
+
+  u12.players.order(:last_name, :first_name).each_with_index do |player, idx|
+    TeamPlayer.find_or_create_by!(academy: academy, cup_team: u12_team, player: player) do |tp|
+      tp.jersey_number = idx + 1
+      tp.position = idx.even? ? "MID" : "DEF"
+    end
+  end
+
+  Match.find_or_create_by!(academy: academy, tournament: spring_tournament, cup_team: u12_team, opponent_name: "Porto Youth", starts_at: 5.weeks.from_now.change(hour: 11, min: 0)) do |m|
+    m.venue  = "Main Stadium"
+    m.home   = true
+    m.status = :scheduled
+  end
+
+  Match.find_or_create_by!(academy: academy, tournament: spring_tournament, cup_team: u12_team, opponent_name: "Braga Juniors", starts_at: 6.weeks.from_now.change(hour: 16, min: 30)) do |m|
+    m.venue      = "Field B"
+    m.home       = false
+    m.status     = :played
+    m.home_score = 2
+    m.away_score = 1
+    m.notes      = "Strong start, conceded after halftime, winning goal late."
+  end
+
   puts "  Sport schools: #{SportSchool.where(academy: academy).count}"
   puts "  Categories: #{Category.where(academy: academy).count}"
   puts "  Players: #{Player.where(academy: academy).count}"
@@ -177,6 +215,11 @@ ActsAsTenant.with_tenant(academy) do
   puts "  Attendance records: #{AttendanceRecord.where(academy: academy).count}"
   puts "  Training plans: #{TrainingPlan.where(academy: academy).count}"
   puts "  Announcements: #{Announcement.where(academy: academy).count}"
+  puts "  Cups: #{Cup.where(academy: academy).count}"
+  puts "  Tournaments: #{Tournament.where(academy: academy).count}"
+  puts "  Cup teams: #{CupTeam.where(academy: academy).count}"
+  puts "  Team players: #{TeamPlayer.where(academy: academy).count}"
+  puts "  Matches: #{Match.where(academy: academy).count}"
 
   # ── Salaries — last 2 months ─────────────────────────────────
   [academy].each do
