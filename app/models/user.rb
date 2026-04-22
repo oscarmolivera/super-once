@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :academies, through: :memberships
+  has_many :employees, dependent: :nullify
 
   # ── Validations ──────────────────────────────────────────────
   validates :email_address,

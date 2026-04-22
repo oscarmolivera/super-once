@@ -1,0 +1,37 @@
+<% content_for :title, "Categories" %>
+
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold text-gray-900">Categories</h1>
+    <% if policy(Category.new(academy: current_academy)).new? %>
+      <%= link_to "New category", new_school_category_path, class: "rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
+    <% end %>
+  </div>
+
+  <div class="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100">
+    <% @categories.each do |category| %>
+      <div class="p-4 flex items-center gap-3">
+        <div>
+          <div class="text-sm font-medium text-gray-900">
+            <%= link_to category.name, school_category_path(category), class: "hover:underline" %>
+          </div>
+          <div class="text-xs text-gray-500">
+            <%= category.sport_school.name %>
+            <% if category.min_age || category.max_age %>
+              <span class="text-gray-400">·</span>
+              Ages <%= [category.min_age, category.max_age].compact.join("–") %>
+            <% end %>
+          </div>
+        </div>
+        <div class="ml-auto text-sm text-gray-500">
+          <%= category.players.count %> players
+        </div>
+      </div>
+    <% end %>
+
+    <% if @categories.empty? %>
+      <div class="p-6 text-sm text-gray-500">No categories yet.</div>
+    <% end %>
+  </div>
+</div>
+

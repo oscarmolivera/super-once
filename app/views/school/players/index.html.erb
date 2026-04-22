@@ -1,0 +1,30 @@
+<% content_for :title, "Players" %>
+
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold text-gray-900">Players</h1>
+    <% if policy(Player.new(academy: current_academy)).new? %>
+      <%= link_to "Register player", new_school_player_path, class: "rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
+    <% end %>
+  </div>
+
+  <div class="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100">
+    <% @players.each do |player| %>
+      <div class="p-4 flex items-center">
+        <div>
+          <div class="text-sm font-medium text-gray-900">
+            <%= link_to "#{player.last_name}, #{player.first_name}", school_player_path(player), class: "hover:underline" %>
+          </div>
+          <div class="text-xs text-gray-500">
+            Born <%= l(player.birth_date) %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @players.empty? %>
+      <div class="p-6 text-sm text-gray-500">No players yet.</div>
+    <% end %>
+  </div>
+</div>
+

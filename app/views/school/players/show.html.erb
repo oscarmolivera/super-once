@@ -1,0 +1,47 @@
+<% content_for :title, "#{@player.first_name} #{@player.last_name}" %>
+
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-xl font-semibold text-gray-900"><%= @player.first_name %> <%= @player.last_name %></h1>
+      <p class="text-sm text-gray-500">Born <%= l(@player.birth_date) %></p>
+    </div>
+    <div class="flex items-center gap-2">
+      <% if policy(@player).edit? %>
+        <%= link_to "Edit", edit_school_player_path(@player), class: "rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50" %>
+      <% end %>
+      <% if policy(@player).destroy? %>
+        <%= button_to "Delete", school_player_path(@player), method: :delete, data: { turbo_confirm: "Remove this player?" }, class: "rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="rounded-xl border border-gray-200 bg-white p-4">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3">Guardian</h2>
+      <dl class="text-sm text-gray-700 space-y-2">
+        <div><dt class="text-gray-500">Name</dt><dd><%= @player.guardian_name.presence || "—" %></dd></div>
+        <div><dt class="text-gray-500">Phone</dt><dd><%= @player.guardian_phone.presence || "—" %></dd></div>
+        <div><dt class="text-gray-500">Email</dt><dd><%= @player.guardian_email.presence || "—" %></dd></div>
+      </dl>
+    </div>
+
+    <div class="rounded-xl border border-gray-200 bg-white p-4">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3">Enrollments</h2>
+      <% if @enrollments.any? %>
+        <ul class="space-y-2">
+          <% @enrollments.each do |e| %>
+            <li class="text-sm text-gray-700">
+              <%= link_to e.category.name, school_category_path(e.category), class: "font-medium hover:underline" %>
+              <span class="text-gray-400">·</span>
+              <span class="capitalize"><%= e.status %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-sm text-gray-500">Not enrolled in any category yet.</p>
+      <% end %>
+    </div>
+  </div>
+</div>
+

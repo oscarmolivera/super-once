@@ -1,0 +1,29 @@
+<% content_for :title, @announcement.title %>
+
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-xl font-semibold text-gray-900"><%= @announcement.title %></h1>
+      <p class="text-sm text-gray-500">
+        <%= @announcement.category&.name || "Academy-wide" %>
+        <span class="text-gray-400">·</span>
+        <%= @announcement.published_at ? l(@announcement.published_at, format: :long) : "Draft" %>
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <% if policy(@announcement).edit? %>
+        <%= link_to "Edit", edit_school_announcement_path(@announcement), class: "rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50" %>
+      <% end %>
+      <% if policy(@announcement).destroy? %>
+        <%= button_to "Delete", school_announcement_path(@announcement), method: :delete, data: { turbo_confirm: "Delete this announcement?" }, class: "rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-gray-200 bg-white p-4">
+    <div class="prose max-w-none">
+      <%= simple_format(@announcement.body.to_s) %>
+    </div>
+  </div>
+</div>
+

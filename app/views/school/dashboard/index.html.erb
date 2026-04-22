@@ -10,13 +10,54 @@
       </div>
       <h1 class="text-xl font-semibold text-gray-900">School</h1>
     </div>
-    <p class="text-sm text-gray-500">Players, categories, practices and training plans. Coming in Phase 4.</p>
+    <p class="text-sm text-gray-500">Manage categories, players, practice sessions, attendance and announcements.</p>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <%= render "shared/coming_soon_card", title: "Schools",        description: "Soccer, futsal and other sports" %>
-    <%= render "shared/coming_soon_card", title: "Categories",     description: "Age groups within each school" %>
-    <%= render "shared/coming_soon_card", title: "Players",        description: "Registration and enrollment" %>
-    <%= render "shared/coming_soon_card", title: "Practice sessions", description: "Schedule, attendance and training plans" %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+    <%= link_to school_categories_path, class: "block rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-300" do %>
+      <div class="text-sm font-medium text-gray-900">Categories</div>
+      <div class="text-sm text-gray-500 mt-1"><%= @categories.count %> total</div>
+    <% end %>
+
+    <%= link_to school_practice_sessions_path, class: "block rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-300" do %>
+      <div class="text-sm font-medium text-gray-900">Practice sessions</div>
+      <div class="text-sm text-gray-500 mt-1">Upcoming: <%= @upcoming_sessions.count %></div>
+    <% end %>
+
+    <%= link_to school_players_path, class: "block rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-300" do %>
+      <div class="text-sm font-medium text-gray-900">Players</div>
+      <div class="text-sm text-gray-500 mt-1">Registry</div>
+    <% end %>
+
+    <%= link_to school_announcements_path, class: "block rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-300" do %>
+      <div class="text-sm font-medium text-gray-900">Communication board</div>
+      <div class="text-sm text-gray-500 mt-1">Announcements</div>
+    <% end %>
+  </div>
+
+  <div class="rounded-xl border border-gray-200 bg-white p-4">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold text-gray-900">Upcoming sessions</h2>
+      <%= link_to "Schedule", new_school_practice_session_path, class: "text-sm text-indigo-600 hover:text-indigo-700" if policy(PracticeSession.new(academy: current_academy)).new? %>
+    </div>
+
+    <% if @upcoming_sessions.any? %>
+      <div class="divide-y divide-gray-100">
+        <% @upcoming_sessions.each do |s| %>
+          <div class="py-2 flex items-center gap-3">
+            <div class="text-sm text-gray-900">
+              <%= link_to s.category.name, school_category_path(s.category), class: "font-medium hover:underline" %>
+              <span class="text-gray-400">·</span>
+              <%= l(s.starts_at, format: :long) %>
+            </div>
+            <div class="ml-auto">
+              <%= link_to "Attendance", attendance_school_practice_session_path(s), class: "text-sm text-indigo-600 hover:text-indigo-700" if policy(s).attendance? %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-500">No upcoming sessions yet.</p>
+    <% end %>
   </div>
 </div>
