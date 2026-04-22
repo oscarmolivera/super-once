@@ -1,17 +1,17 @@
 class ProfileController < ApplicationController
   def show
     authorize :profile, :show?
-    @user = Current.user
+    @user = current.user
   end
 
   def edit
     authorize :profile, :edit?
-    @user = Current.user
+    @user = current.user
   end
 
   def update
     authorize :profile, :update?
-    @user = Current.user
+    @user = current.user
 
     if profile_params[:password].present?
       unless @user.authenticate(profile_params[:current_password])
@@ -36,6 +36,7 @@ class ProfileController < ApplicationController
     )
   end
 
+  # Only pass password attributes if the user is actually changing their password
   def allowed_params
     attrs = profile_params.slice(:full_name, :email_address)
     if profile_params[:password].present?

@@ -1,0 +1,60 @@
+<% content_for :title, "Employees" %>
+<%= render "enterprise/subnav_layout" do %>
+
+<%= render "shared/page_header",
+      title: "Employees",
+      action_path: (policy(Employee).new? ? new_enterprise_employee_path : nil),
+      action_label: "Add employee" %>
+
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+  <% if @employees.any? %>
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-100">
+        <tr>
+          <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Name</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Role</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Base salary</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
+          <th class="px-5 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @employees.each do |emp| %>
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-5 py-3.5">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-700 text-xs font-semibold flex-shrink-0">
+                  <%= emp.full_name.split.map(&:first).first(2).join.upcase %>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-900"><%= emp.full_name %></p>
+                  <p class="text-xs text-gray-400"><%= emp.email %></p>
+                </div>
+              </div>
+            </td>
+            <td class="px-5 py-3.5 text-gray-700"><%= emp.display_type %></td>
+            <td class="px-5 py-3.5 text-gray-700"><%= number_to_currency(emp.base_salary, unit: "€", format: "%u%n") %></td>
+            <td class="px-5 py-3.5">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= emp.status_active? ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500' %>">
+                <%= emp.status.capitalize %>
+              </span>
+            </td>
+            <td class="px-5 py-3.5 text-right">
+              <%= link_to enterprise_employee_path(emp), class: "text-xs text-indigo-500 hover:underline" do %>View<% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <div class="px-5 py-12 text-center">
+      <p class="text-sm text-gray-400 mb-3">No employees yet.</p>
+      <% if policy(Employee).new? %>
+        <%= link_to "Add your first employee", new_enterprise_employee_path,
+              class: "text-sm text-indigo-600 font-medium hover:underline" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<% end %>

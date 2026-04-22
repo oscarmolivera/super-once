@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
   #                                  SessionsController and PasswordsController call
   #                                  allow_unauthenticated_access to skip this.
   #
-  #   3. verify_tenant_membership  — confirms Current.user belongs to this academy.
+  #   3. verify_tenant_membership  — confirms current.user belongs to this academy.
   #                                  Only runs after a session is confirmed.
   #
   before_action :set_current_academy,      if: :tenant_subdomain?
@@ -32,13 +32,13 @@ class ApplicationController < ActionController::Base
   private
 
   # ── Step 1: resolve tenant from subdomain ────────────────────
-  # Never calls Current.user — safe before any session check.
+  # Never calls current.user — safe before any session check.
   def set_current_academy
     slug = request.subdomain.presence
     @current_academy = Academy.find_by(slug: slug)
 
     unless @current_academy
-      redirect_to "https://www.nubbe.net", alert: "Academy not found."
+      redirect_to academy_welcome_path, alert: "Academy not found."
       return
     end
 
@@ -69,7 +69,7 @@ class ApplicationController < ActionController::Base
   # ── Pundit context ───────────────────────────────────────────
   # Pass PunditContext so policies receive the resolved role — no extra DB hit.
   def pundit_user
-    return Current.user unless current_academy
+    return current.user unless current_academy
 
     PunditContext.new(
       user:    Current.user,

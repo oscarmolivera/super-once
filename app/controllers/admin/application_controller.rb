@@ -8,9 +8,9 @@ module Admin
     private
 
     def require_superadmin
-      unless Current.user&.superadmin?
+      unless current_user&.superadmin?
         flash[:alert] = "Superadmin access required."
-        redirect_to root_path, status: :see_other
+        redirect_to www_root_path
       end
     end
 
@@ -19,8 +19,10 @@ module Admin
       Current.user
     end
 
+    # Opt out of Pundit for the superadmin namespace.
+    # Superadmins can see and do everything by definition.
     def pundit_user
-      Current.user
+      current_user
     end
   end
 end

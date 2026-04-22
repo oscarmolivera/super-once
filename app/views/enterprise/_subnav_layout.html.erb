@@ -1,0 +1,29 @@
+<%# Rendered inside the main application layout.
+    Provides the secondary Enterprise sidebar nav + content slot. %>
+
+<div class="flex gap-6 max-w-7xl mx-auto">
+
+  <%# Enterprise sub-nav %>
+  <aside class="hidden lg:block w-48 flex-shrink-0">
+    <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 mb-2">Enterprise</p>
+    <nav class="space-y-0.5">
+      <% enterprise_nav_items.each do |item| %>
+        <%= link_to item[:path],
+              class: "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors #{
+                request.path.start_with?(item[:path]) && !(item[:path] == enterprise_root_path && request.path != enterprise_root_path) ?
+                  'bg-indigo-50 text-indigo-700 font-medium' :
+                  'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+              }" do %>
+          <%= render "shared/icon", name: item[:icon], css: "w-4 h-4 flex-shrink-0" %>
+          <%= item[:label] %>
+        <% end %>
+      <% end %>
+    </nav>
+  </aside>
+
+  <%# Page content %>
+  <div class="flex-1 min-w-0">
+    <%= yield %>
+  </div>
+
+</div>

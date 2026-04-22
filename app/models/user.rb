@@ -1,3 +1,7 @@
+# Rails 8 `rails generate authentication` creates the base User model.
+# This file EXTENDS it with SuperOnce-specific associations and helpers.
+# Do not duplicate has_secure_password or email_address — those come from the generator.
+
 class User < ApplicationRecord
   has_secure_password
 

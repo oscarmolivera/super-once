@@ -1,0 +1,91 @@
+<% content_for :title, "Finances" %>
+<%= render "enterprise/subnav_layout" do %>
+
+<div class="space-y-5">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="text-xl font-semibold text-gray-900">Income & expenses</h1>
+      <p class="text-sm text-gray-500 mt-0.5"><%= @year %></p>
+    </div>
+    <div class="flex items-center gap-3">
+      <%# Year nav %>
+      <%= link_to enterprise_income_expenses_path(year: @year - 1), class: "px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50" do %>‹ <%= @year - 1 %><% end %>
+      <%= link_to enterprise_income_expenses_path(year: @year + 1), class: "px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50" do %><%= @year + 1 %> ›<% end %>
+
+      <%# Kind filter %>
+      <div class="flex rounded-lg border border-gray-200 overflow-hidden text-sm">
+        <%= link_to "All",     enterprise_income_expenses_path(year: @year),              class: "px-3 py-1.5 #{@kind.nil? ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}" %>
+        <%= link_to "Income",  enterprise_income_expenses_path(year: @year, kind: "income"),  class: "px-3 py-1.5 border-l border-gray-200 #{@kind == 'income' ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}" %>
+        <%= link_to "Expense", enterprise_income_expenses_path(year: @year, kind: "expense"), class: "px-3 py-1.5 border-l border-gray-200 #{@kind == 'expense' ? 'bg-red-50 text-red-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}" %>
+      </div>
+
+      <% if policy(IncomeExpense).new? %>
+        <%= link_to new_enterprise_income_expense_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors" do %>
+          <%= render "shared/icon", name: "plus", css: "w-4 h-4" %>
+          Add entry
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Balance summary %>
+  <div class="grid grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <p class="text-xs text-gray-400 mb-1">Total income</p>
+      <p class="text-xl font-semibold text-green-700"><%= number_to_currency(@total_income, unit: "€", format: "%u%n") %></p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <p class="text-xs text-gray-400 mb-1">Total expenses</p>
+      <p class="text-xl font-semibold text-red-700"><%= number_to_currency(@total_expenses, unit: "€", format: "%u%n") %></p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <p class="text-xs text-gray-400 mb-1">Balance</p>
+      <p class="text-xl font-semibold <%= @balance >= 0 ? 'text-green-700' : 'text-red-700' %>">
+        <%= number_to_currency(@balance, unit: "€", format: "%u%n") %>
+      </p>
+    </div>
+  </div>
+
+  <%# Ledger table %>
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <% if @entries.any? %>
+      <table class="w-full text-sm">
+        <thead class="border-b border-gray-100">
+          <tr>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Category</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Amount</th>
+            <th class="px-5 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @entries.each do |entry| %>
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-5 py-3.5 text-gray-500 whitespace-nowrap"><%= entry.recorded_on.strftime("%b %d, %Y") %></td>
+              <td class="px-5 py-3.5 text-gray-900"><%= entry.description %></td>
+              <td class="px-5 py-3.5 text-gray-500"><%= entry.category.to_s.humanize %></td>
+              <td class="px-5 py-3.5 font-medium whitespace-nowrap <%= entry.kind_income? ? 'text-green-700' : 'text-red-700' %>">
+                <%= entry.kind_income? ? "+" : "−" %><%= number_to_currency(entry.amount, unit: "€", format: "%u%n") %>
+              </td>
+              <td class="px-5 py-3.5 text-right">
+                <% if policy(entry).edit? %>
+                  <%= link_to edit_enterprise_income_expense_path(entry), class: "text-xs text-indigo-500 hover:underline mr-3" do %>Edit<% end %>
+                <% end %>
+                <% if policy(entry).destroy? %>
+                  <%= button_to enterprise_income_expense_path(entry), method: :delete,
+                        data: { turbo_confirm: "Delete this entry?" },
+                        class: "text-xs text-red-400 hover:underline" do %>Delete<% end %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="px-5 py-12 text-center text-sm text-gray-400">No entries for <%= @year %>.</p>
+    <% end %>
+  </div>
+</div>
+
+<% end %>

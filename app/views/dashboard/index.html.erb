@@ -2,10 +2,9 @@
 
 <div class="max-w-5xl mx-auto">
 
-  <%# Header %>
   <div class="mb-8">
     <h1 class="text-2xl font-semibold text-gray-900">
-      Welcome<%# if current_user.full_name %>, <%#= current_user.full_name.split.first %><%# end %>
+      Welcome<% if Current.user.full_name %>, <%= Current.user.full_name.split.first %><% end %>
     </h1>
     <p class="text-sm text-gray-500 mt-1">
       <%= current_academy.name %>
@@ -18,7 +17,7 @@
     </p>
   </div>
 
-  <%# Stat cards %>
+  <%# Stat cards — financial detail only for admin+ %>
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <div class="bg-white rounded-xl border border-gray-200 p-5">
       <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Members</p>
@@ -38,6 +37,38 @@
     </div>
   </div>
 
+  <%# Financial summary strip — admins only %>
+  <% if current_membership&.admin? || current_membership&.owner? %>
+    <div class="bg-white rounded-xl border border-gray-200 p-5 mb-8 flex flex-wrap items-center gap-6">
+      <div>
+        <p class="text-xs text-gray-400 mb-0.5">Income this month</p>
+        <p class="text-lg font-semibold text-green-700"><%= number_to_currency(@income_this_month, unit: "€", format: "%u%n") %></p>
+      </div>
+      <div class="w-px h-8 bg-gray-100"></div>
+      <div>
+        <p class="text-xs text-gray-400 mb-0.5">Expenses this month</p>
+        <p class="text-lg font-semibold text-red-700"><%= number_to_currency(@expense_this_month, unit: "€", format: "%u%n") %></p>
+      </div>
+      <div class="w-px h-8 bg-gray-100"></div>
+      <div>
+        <p class="text-xs text-gray-400 mb-0.5">Balance</p>
+        <p class="text-lg font-semibold <%= @balance_this_month >= 0 ? 'text-gray-900' : 'text-red-600' %>">
+          <%= number_to_currency(@balance_this_month, unit: "€", format: "%u%n") %>
+        </p>
+      </div>
+      <% if @overdue_payments > 0 %>
+        <div class="w-px h-8 bg-gray-100"></div>
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">Overdue payments</p>
+          <p class="text-lg font-semibold text-red-600"><%= @overdue_payments %></p>
+        </div>
+      <% end %>
+      <div class="ml-auto">
+        <%= link_to enterprise_root_path, class: "text-sm text-indigo-500 font-medium hover:underline" do %>Enterprise →<% end %>
+      </div>
+    </div>
+  <% end %>
+
   <%# Three pillar cards %>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
 
@@ -52,7 +83,7 @@
         </div>
         <h2 class="text-base font-semibold text-gray-900 mb-1">Enterprise</h2>
         <p class="text-sm text-gray-500 leading-relaxed">Staff, payroll, finances &amp; inventory</p>
-        <p class="mt-3 text-xs text-indigo-500 font-medium group-hover:underline">Open &rarr;</p>
+        <p class="mt-3 text-xs text-indigo-500 font-medium group-hover:underline">Open →</p>
       </div>
     <% end %>
 
@@ -67,7 +98,7 @@
         </div>
         <h2 class="text-base font-semibold text-gray-900 mb-1">School</h2>
         <p class="text-sm text-gray-500 leading-relaxed">Players, categories, practice &amp; training</p>
-        <p class="mt-3 text-xs text-teal-500 font-medium group-hover:underline">Open &rarr;</p>
+        <p class="mt-3 text-xs text-teal-500 font-medium group-hover:underline">Open →</p>
       </div>
     <% end %>
 
@@ -82,13 +113,12 @@
         </div>
         <h2 class="text-base font-semibold text-gray-900 mb-1">Club</h2>
         <p class="text-sm text-gray-500 leading-relaxed">Cups, tournaments &amp; teams</p>
-        <p class="mt-3 text-xs text-amber-500 font-medium group-hover:underline">Open &rarr;</p>
+        <p class="mt-3 text-xs text-amber-500 font-medium group-hover:underline">Open →</p>
       </div>
     <% end %>
 
   </div>
 
-  <%# Quick links footer row %>
   <div class="flex items-center gap-6 text-sm text-gray-400">
     <%= link_to "Members (#{@members_count})", memberships_path, class: "hover:text-gray-700 transition-colors" %>
     <% if policy(current_academy).settings_edit? %>

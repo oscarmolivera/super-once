@@ -1,0 +1,99 @@
+<% content_for :title, @employee.full_name %>
+<%= render "enterprise/subnav_layout" do %>
+
+<%= render "shared/page_header",
+      title: @employee.full_name,
+      back_path: enterprise_employees_path %>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+  <%# Profile card %>
+  <div class="lg:col-span-1 space-y-4">
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+      <div class="flex items-center gap-4 mb-5 pb-5 border-b border-gray-100">
+        <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-lg font-bold flex-shrink-0">
+          <%= @employee.full_name.split.map(&:first).first(2).join.upcase %>
+        </div>
+        <div>
+          <p class="font-semibold text-gray-900"><%= @employee.full_name %></p>
+          <p class="text-sm text-gray-500"><%= @employee.display_type %></p>
+          <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-xs font-medium
+            <%= @employee.status_active? ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500' %>">
+            <%= @employee.status.capitalize %>
+          </span>
+        </div>
+      </div>
+
+      <%= render "shared/setting_row", label: "Email",       value: @employee.email.presence || "—" %>
+      <%= render "shared/setting_row", label: "Phone",       value: @employee.phone.presence || "—" %>
+      <%= render "shared/setting_row", label: "Document",    value: @employee.document_number.presence || "—" %>
+      <%= render "shared/setting_row", label: "Birth date",  value: @employee.birth_date&.strftime("%b %d, %Y") || "—" %>
+      <%= render "shared/setting_row", label: "Hire date",   value: @employee.hire_date&.strftime("%b %d, %Y") || "—" %>
+      <%= render "shared/setting_row", label: "Base salary", value: number_to_currency(@employee.base_salary, unit: "€", format: "%u%n") %>
+      <% if @employee.notes.present? %>
+        <%= render "shared/setting_row", label: "Notes", value: @employee.notes %>
+      <% end %>
+    </div>
+
+    <% if policy(@employee).edit? %>
+      <div class="flex gap-3">
+        <%= link_to edit_enterprise_employee_path(@employee),
+              class: "flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" do %>
+          <%= render "shared/icon", name: "pencil", css: "w-4 h-4" %>
+          Edit
+        <% end %>
+        <% if policy(@employee).destroy? %>
+          <%= button_to enterprise_employee_path(@employee), method: :delete,
+                data: { turbo_confirm: "Remove #{@employee.full_name}? This will also delete all their salary records." },
+                class: "px-3 py-2 border border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors" do %>
+            <%= render "shared/icon", name: "trash", css: "w-4 h-4" %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Salary history %>
+  <div class="lg:col-span-2">
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-900">Salary history</h2>
+        <% if policy(Salary).new? %>
+          <%= link_to "View payroll", enterprise_salaries_path, class: "text-xs text-indigo-500 hover:underline" %>
+        <% end %>
+      </div>
+      <% if @recent_salaries.any? %>
+        <table class="w-full text-sm">
+          <thead class="border-b border-gray-100">
+            <tr>
+              <th class="px-5 py-2.5 text-left text-xs font-semibold text-gray-500">Period</th>
+              <th class="px-5 py-2.5 text-left text-xs font-semibold text-gray-500">Amount</th>
+              <th class="px-5 py-2.5 text-left text-xs font-semibold text-gray-500">Status</th>
+              <th class="px-5 py-2.5 text-left text-xs font-semibold text-gray-500">Paid on</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% @recent_salaries.each do |s| %>
+              <tr>
+                <td class="px-5 py-3 text-gray-900"><%= s.period_label %></td>
+                <td class="px-5 py-3 text-gray-900"><%= number_to_currency(s.amount, unit: "€", format: "%u%n") %></td>
+                <td class="px-5 py-3">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                    <%= s.status_paid? ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700' %>">
+                    <%= s.status.capitalize %>
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-gray-500"><%= s.paid_on&.strftime("%b %d, %Y") || "—" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p class="px-5 py-8 text-center text-sm text-gray-400">No salary records yet.</p>
+      <% end %>
+    </div>
+  </div>
+
+</div>
+
+<% end %>

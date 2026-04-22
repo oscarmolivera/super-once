@@ -1,0 +1,5 @@
+<% content_for :title, "New employee" %>
+<%= render "enterprise/subnav_layout" do %>
+  <%= render "shared/page_header", title: "New employee", back_path: enterprise_employees_path %>
+  <%= render "enterprise/employees/form", employee: @employee, url: enterprise_employees_path %>
+<% end %>

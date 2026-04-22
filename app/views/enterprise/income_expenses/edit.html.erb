@@ -1,0 +1,8 @@
+<% content_for :title, "Edit entry" %>
+<%= render "enterprise/subnav_layout" do %>
+  <%= render "shared/page_header", title: "Edit entry", back_path: enterprise_income_expenses_path %>
+  <%= render "enterprise/income_expenses/form",
+        entry: @entry,
+        url: enterprise_income_expense_path(@entry),
+        method: :patch %>
+<% end %>

@@ -1,0 +1,8 @@
+<% content_for :title, @employee.full_name %>
+<%= render "enterprise/subnav_layout" do %>
+  <%= render "shared/page_header", title: "Edit #{@employee.full_name}", back_path: enterprise_employee_path(@employee) %>
+  <%= render "enterprise/employees/form",
+        employee: @employee,
+        url: enterprise_employee_path(@employee),
+        method: :patch %>
+<% end %>
