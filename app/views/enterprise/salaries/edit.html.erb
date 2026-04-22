@@ -1,0 +1,9 @@
+<% content_for :title, "Edit salary" %>
+<%= render "enterprise/subnav_layout" do %>
+  <%= render "shared/page_header", title: "Edit salary entry", back_path: enterprise_salaries_path %>
+  <%= render "enterprise/salaries/form",
+        salary: @salary,
+        url: enterprise_salary_path(@salary),
+        method: :patch,
+        employees: @employees %>
+<% end %>

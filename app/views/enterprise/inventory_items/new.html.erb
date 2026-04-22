@@ -1,0 +1,5 @@
+<% content_for :title, "New item" %>
+<%= render "enterprise/subnav_layout" do %>
+  <%= render "shared/page_header", title: "New inventory item", back_path: enterprise_inventory_items_path %>
+  <%= render "enterprise/inventory_items/form", item: @item, url: enterprise_inventory_items_path %>
+<% end %>

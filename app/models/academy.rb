@@ -1,11 +1,19 @@
 class Academy < ApplicationRecord
-  # This IS the tenant. Every model that belongs to an academy
-  # calls `acts_as_tenant(:academy)` and gets automatic account scoping.
-  has_many :memberships,  dependent: :destroy
-  has_many :users,        through: :memberships
-  has_many :invitations,  dependent: :destroy
+  # This IS the tenant. Every model calls `acts_as_tenant(:academy)`.
+  # ── Associations ────────────────────────────────────────────────
+  has_many :memberships,    dependent: :destroy
+  has_many :users,          through: :memberships
+  has_many :invitations,    dependent: :destroy
 
-  # ── Validations ──────────────────────────────────────────────
+  # Enterprise pillar
+  has_many :employees,       dependent: :destroy
+  has_many :salaries,        dependent: :destroy
+  has_many :income_expenses, dependent: :destroy
+  has_many :player_payments, dependent: :destroy
+  has_many :inventory_items, dependent: :destroy
+  has_many :tax_permits,     dependent: :destroy
+
+  # ── Validations ─────────────────────────────────────────────────
   validates :name, presence: true
   validates :slug,
     presence: true,
@@ -13,34 +21,25 @@ class Academy < ApplicationRecord
     format: { with: /\A[a-z0-9\-]+\z/, message: "only lowercase letters, numbers and hyphens" },
     length: { minimum: 3, maximum: 63 }
 
-  # Reserved subdomains that cannot be used as academy slugs
   RESERVED_SLUGS = %w[www admin api mail assets static].freeze
   validate :slug_not_reserved
 
-  # ── Scopes ───────────────────────────────────────────────────
+  # ── Scopes ──────────────────────────────────────────────────────
   scope :active,    -> { where(status: :active) }
   scope :on_trial,  -> { where(status: :trial) }
   scope :suspended, -> { where(status: :suspended) }
 
-  # ── Enums ────────────────────────────────────────────────────
+  # ── Enums ───────────────────────────────────────────────────────
   enum :status, { trial: 0, active: 1, suspended: 2, cancelled: 3 }, prefix: true
   enum :plan,   { free: 0, starter: 1, pro: 2, enterprise: 3 }
 
-  # ── Callbacks ────────────────────────────────────────────────
+  # ── Callbacks ───────────────────────────────────────────────────
   before_validation :normalize_slug
 
-  # ── Instance helpers ─────────────────────────────────────────
-  def subdomain
-    slug
-  end
-
-  def full_domain(tld = "nubbe.net")
-    "#{slug}.#{tld}"
-  end
-
-  def owner
-    memberships.owner.first&.user
-  end
+  # ── Instance helpers ────────────────────────────────────────────
+  def subdomain   = slug
+  def full_domain(tld = "nubbe.net") = "#{slug}.#{tld}"
+  def owner       = memberships.owner.first&.user
 
   private
 

@@ -1,0 +1,8 @@
+<% content_for :title, "Edit document" %>
+<%= render "enterprise/subnav_layout" do %>
+  <%= render "shared/page_header", title: "Edit document", back_path: enterprise_tax_permits_path %>
+  <%= render "enterprise/tax_permits/form",
+        permit: @permit,
+        url: enterprise_tax_permit_path(@permit),
+        method: :patch %>
+<% end %>

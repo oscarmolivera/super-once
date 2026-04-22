@@ -27,7 +27,7 @@ Rails.application.routes.draw do
   constraints subdomain: /\A(?!www\z|admin\z).+\z/ do
 
     # ── Public (no auth required) ──────────────
-    get "welcome", to: "pages#academy", as: :academy_welcome
+    get "welcome",             to: "pages#academy",       as: :academy_welcome
     get  "invitations/:token", to: "invitations#accept",  as: :accept_invitation
     post "invitations/:token", to: "invitations#confirm"
 
@@ -38,8 +38,7 @@ Rails.application.routes.draw do
     # ── Authenticated tenant routes ────────────
     root "dashboard#index", as: :tenant_root
 
-    resource :profile, only: %i[show edit update]
-
+    resource :profile,          only: %i[show edit update]
     resource :academy_settings, only: %i[show edit update]
 
     resources :memberships, only: %i[index new create destroy] do
@@ -48,8 +47,20 @@ Rails.application.routes.draw do
 
     resources :invitations, only: %i[new create]
 
+    # ── Enterprise pillar ─────────────────────────────────────
     namespace :enterprise do
       root "dashboard#index"
+
+      resources :employees
+      resources :salaries do
+        collection { post :generate_month }
+      end
+      resources :income_expenses
+      resources :player_payments do
+        member { patch :mark_paid }
+      end
+      resources :inventory_items
+      resources :tax_permits
     end
 
     namespace :school do

@@ -1,0 +1,18 @@
+<%# locals: (title:, back_path: nil, back_label: nil, action_path: nil, action_label: nil) %>
+<div class="flex items-center justify-between mb-6">
+  <div class="flex items-center gap-3">
+    <% if back_path %>
+      <%= link_to back_path, class: "p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors" do %>
+        <%= render "shared/icon", name: "arrow-left", css: "w-4 h-4" %>
+      <% end %>
+    <% end %>
+    <h1 class="text-xl font-semibold text-gray-900"><%= title %></h1>
+  </div>
+  <% if action_path && action_label %>
+    <%= link_to action_path,
+          class: "inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors" do %>
+      <%= render "shared/icon", name: "plus", css: "w-4 h-4" %>
+      <%= action_label %>
+    <% end %>
+  <% end %>
+</div>

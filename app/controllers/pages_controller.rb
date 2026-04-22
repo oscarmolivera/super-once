@@ -12,6 +12,6 @@ class PagesController < ActionController::Base
   def academy
     slug     = request.subdomain
     @academy = Academy.find_by(slug: slug)
-    redirect_to root_path unless @academy
+    redirect_to academy_welcome_path unless @academy
   end
 end

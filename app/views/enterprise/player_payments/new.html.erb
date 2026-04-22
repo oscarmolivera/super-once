@@ -1,0 +1,5 @@
+<% content_for :title, "New payment" %>
+<%= render "enterprise/subnav_layout" do %>
+  <%= render "shared/page_header", title: "New player payment", back_path: enterprise_player_payments_path %>
+  <%= render "enterprise/player_payments/form", payment: @payment, url: enterprise_player_payments_path %>
+<% end %>

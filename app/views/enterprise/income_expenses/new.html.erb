@@ -1,0 +1,5 @@
+<% content_for :title, "New entry" %>
+<%= render "enterprise/subnav_layout" do %>
+  <%= render "shared/page_header", title: "New ledger entry", back_path: enterprise_income_expenses_path %>
+  <%= render "enterprise/income_expenses/form", entry: @entry, url: enterprise_income_expenses_path %>
+<% end %>

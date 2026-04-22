@@ -40,7 +40,7 @@ class InvitationsController < ApplicationController
     @academy    = @invitation&.academy
 
     unless @invitation
-      redirect_to root_path, alert: "This invitation is invalid or has expired."
+      redirect_to "https://www.nubbe.net", alert: "This invitation is invalid or has expired."
       return
     end
 

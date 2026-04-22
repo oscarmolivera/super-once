@@ -1,22 +1,81 @@
 <% content_for :title, "Enterprise" %>
-
-<div class="max-w-4xl mx-auto">
-  <div class="mb-8">
-    <div class="flex items-center gap-3 mb-2">
-      <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>
-        </svg>
-      </div>
-      <h1 class="text-xl font-semibold text-gray-900">Enterprise</h1>
-    </div>
-    <p class="text-sm text-gray-500">Staff, payroll, finances and inventory. Coming in Phase 3.</p>
+<%= render "enterprise/subnav_layout" do %>
+<div class="space-y-6">
+  <div>
+    <h1 class="text-xl font-semibold text-gray-900">Enterprise overview</h1>
+    <p class="text-sm text-gray-500 mt-0.5"><%= Date.current.strftime("%B %Y") %></p>
   </div>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <%= render "shared/coming_soon_card", title: "Employees",       description: "Manage coaches, assistants and staff" %>
-    <%= render "shared/coming_soon_card", title: "Payroll",         description: "Monthly salary register" %>
-    <%= render "shared/coming_soon_card", title: "Finances",        description: "Income, expenses and player payments" %>
-    <%= render "shared/coming_soon_card", title: "Inventory",       description: "Equipment and asset tracking" %>
+  <% if @expiring_permits > 0 || @expired_permits > 0 || @overdue_payments > 0 %>
+    <div class="space-y-2">
+      <% if @expired_permits > 0 %>
+        <div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+          <%= render "shared/icon", name: "exclamation-triangle", css: "w-4 h-4 flex-shrink-0 text-red-500" %>
+          <%= @expired_permits %> document<%= @expired_permits > 1 ? "s" : "" %> expired —
+          <%= link_to "review now", enterprise_tax_permits_path, class: "font-semibold underline" %>
+        </div>
+      <% end %>
+      <% if @overdue_payments > 0 %>
+        <div class="flex items-center gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+          <%= render "shared/icon", name: "exclamation-triangle", css: "w-4 h-4 flex-shrink-0 text-amber-500" %>
+          <%= @overdue_payments %> player payment<%= @overdue_payments > 1 ? "s" : "" %> overdue —
+          <%= link_to "view", enterprise_player_payments_path, class: "font-semibold underline" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+  <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Active staff</p>
+      <p class="text-2xl font-semibold text-gray-900"><%= @total_employees %></p>
+      <p class="text-xs text-gray-400 mt-1"><%= @coaches_count %> coaches</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Payroll this month</p>
+      <p class="text-2xl font-semibold text-gray-900"><%= number_to_currency(@payroll_total, unit: "€", format: "%u%n") %></p>
+      <p class="text-xs text-<%= @payroll_pending > 0 ? 'amber' : 'gray' %>-500 mt-1"><%= number_to_currency(@payroll_pending, unit: "€", format: "%u%n") %> pending</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Balance this month</p>
+      <p class="text-2xl font-semibold <%= @balance_this_month >= 0 ? 'text-green-700' : 'text-red-700' %>"><%= number_to_currency(@balance_this_month, unit: "€", format: "%u%n") %></p>
+      <p class="text-xs text-gray-400 mt-1">+<%= number_to_currency(@income_this_month, unit: "€", format: "%u%n") %> / −<%= number_to_currency(@expense_this_month, unit: "€", format: "%u%n") %></p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Player payments</p>
+      <p class="text-2xl font-semibold text-gray-900"><%= @pending_payments %></p>
+      <p class="text-xs text-<%= @overdue_payments > 0 ? 'red' : 'gray' %>-500 mt-1"><%= @overdue_payments %> overdue</p>
+    </div>
+    <%= link_to enterprise_employees_path, class: "bg-white rounded-xl border border-gray-200 p-5 hover:border-indigo-200 transition-colors" do %>
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Employees</p>
+      <p class="text-2xl font-semibold text-gray-900"><%= @total_employees %></p>
+      <p class="text-xs text-indigo-500 mt-1">Manage →</p>
+    <% end %>
+    <%= link_to enterprise_tax_permits_path, class: "bg-white rounded-xl border border-gray-200 p-5 hover:border-indigo-200 transition-colors" do %>
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Documents</p>
+      <p class="text-2xl font-semibold <%= @expired_permits > 0 ? 'text-red-600' : 'text-gray-900' %>"><%= @expired_permits > 0 ? "#{@expired_permits} expired" : "OK" %></p>
+      <p class="text-xs text-indigo-500 mt-1">Review →</p>
+    <% end %>
+  </div>
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+      <h2 class="text-sm font-semibold text-gray-900">Recent transactions</h2>
+      <%= link_to "View all", enterprise_income_expenses_path, class: "text-xs text-indigo-500 hover:underline" %>
+    </div>
+    <% if @recent_entries.any? %>
+      <ul class="divide-y divide-gray-100">
+        <% @recent_entries.each do |entry| %>
+          <li class="flex items-center gap-4 px-5 py-3">
+            <span class="w-7 h-7 rounded-full text-xs font-semibold flex items-center justify-center flex-shrink-0 <%= entry.kind_income? ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700' %>"><%= entry.kind_income? ? "+" : "−" %></span>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-gray-900 truncate"><%= entry.description %></p>
+              <p class="text-xs text-gray-400"><%= entry.recorded_on.strftime("%b %d") %> · <%= entry.category.to_s.humanize %></p>
+            </div>
+            <span class="text-sm font-medium <%= entry.kind_income? ? 'text-green-700' : 'text-red-700' %>"><%= entry.kind_income? ? "+" : "−" %><%= number_to_currency(entry.amount, unit: "€", format: "%u%n") %></span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="px-5 py-8 text-center text-sm text-gray-400">No transactions recorded yet.</p>
+    <% end %>
   </div>
 </div>
+<% end %>

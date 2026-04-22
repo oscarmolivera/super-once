@@ -1,0 +1,53 @@
+<%# locals: (salary:, url:, method: :post, employees:) %>
+<%= form_with model: salary, url: url, method: method, class: "space-y-5" do |f| %>
+  <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div>
+        <%= f.label :employee_id, "Employee", class: "block text-sm font-medium text-gray-700 mb-1.5" %>
+        <%= f.select :employee_id,
+              options_from_collection_for_select(employees, :id, :full_name, salary.employee_id),
+              { prompt: "Select employee" }, class: "input-field" %>
+      </div>
+      <div>
+        <%= f.label :amount, "Amount (€)", class: "block text-sm font-medium text-gray-700 mb-1.5" %>
+        <%= f.number_field :amount, step: "0.01", min: 0, class: "input-field" %>
+      </div>
+      <div>
+        <%= f.label :month, "Month", class: "block text-sm font-medium text-gray-700 mb-1.5" %>
+        <%= f.select :month,
+              options_for_select((1..12).map { |m| [Date::MONTHNAMES[m], m] }, salary.month),
+              {}, class: "input-field" %>
+      </div>
+      <div>
+        <%= f.label :year, "Year", class: "block text-sm font-medium text-gray-700 mb-1.5" %>
+        <%= f.number_field :year, min: 2020, max: Date.current.year + 1, class: "input-field" %>
+      </div>
+      <div>
+        <%= f.label :status, "Status", class: "block text-sm font-medium text-gray-700 mb-1.5" %>
+        <%= f.select :status,
+              options_for_select([["Pending", "pending"], ["Paid", "paid"]], salary.status),
+              {}, class: "input-field" %>
+      </div>
+      <div>
+        <%= f.label :paid_on, "Paid on", class: "block text-sm font-medium text-gray-700 mb-1.5" %>
+        <%= f.date_field :paid_on, class: "input-field" %>
+      </div>
+    </div>
+    <div>
+      <%= f.label :notes, "Notes", class: "block text-sm font-medium text-gray-700 mb-1.5" %>
+      <%= f.text_area :notes, rows: 2, class: "input-field resize-none" %>
+    </div>
+  </div>
+  <% if salary.errors.any? %>
+    <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+      <ul class="text-sm text-red-700 space-y-1 list-disc list-inside">
+        <% salary.errors.full_messages.each do |m| %><li><%= m %></li><% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="flex items-center gap-3">
+    <%= f.submit salary.persisted? ? "Save changes" : "Create entry",
+          class: "px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer" %>
+    <%= link_to "Cancel", enterprise_salaries_path, class: "px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900" %>
+  </div>
+<% end %>
