@@ -31,7 +31,12 @@ module Authentication
 
     def request_authentication
       session[:return_to_after_authenticating] = request.url
-      redirect_to new_session_path
+
+      if admin_request?
+        redirect_to new_admin_session_path
+      else
+        redirect_to new_session_path
+      end
     end
 
     def after_authentication_url
@@ -48,5 +53,11 @@ module Authentication
     def terminate_session
       Current.session.destroy
       cookies.delete(:session_id)
+    end
+
+    private
+
+    def admin_request?
+      params[:subdomain] == "admin" || request.subdomain == "admin"
     end
 end

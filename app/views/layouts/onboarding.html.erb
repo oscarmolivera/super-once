@@ -1,0 +1,28 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  <div class="container mx-auto px-4 py-12">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome to SuperOnce</h1>
+      <p class="text-xl text-gray-600">Set up your academy in minutes</p>
+    </div>
+
+    <!-- Progress Indicator -->
+    <% if action_name != 'start' %>
+      <div class="max-w-2xl mx-auto mb-12">
+        <div class="flex justify-between mb-2">
+          <% (1..5).each do |step| %>
+            <div class="flex-1 mx-1">
+              <div class="h-2 rounded-full <%= (step <= current_step) ? 'bg-indigo-600' : 'bg-gray-300' %>"></div>
+            </div>
+          <% end %>
+        </div>
+        <p class="text-center text-sm text-gray-600">Step <span id="current-step"><%= current_step %></span> of 5</p>
+      </div>
+    <% end %>
+
+    <!-- Main Content -->
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+      <%= yield %>
+    </div>
+  </div>
+</div>

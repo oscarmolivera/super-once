@@ -1,9 +1,10 @@
 module Admin
-  class ApplicationController < Administrate::ApplicationController
+  class ApplicationController < ApplicationController
     include Authentication   # Rails 8 generated concern
+    layout "admin"
 
-    before_action :require_authentication
-    before_action :require_superadmin
+    before_action :require_authentication, except: %i[new create]
+    before_action :require_superadmin, except: %i[new create]
 
     private
 

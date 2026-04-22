@@ -1,0 +1,32 @@
+<h2 class="text-2xl font-bold mb-6">Select Your Sport</h2>
+
+<%= form_with model: @form, url: onboarding_step_2_path, method: :post, class: "space-y-6" do |f| %>
+  <% if @form.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-red-800 mb-2">
+        <%= pluralize(@form.errors.count, 'error') %> prevented saving:
+      </h3>
+      <ul class="list-disc pl-5 text-sm text-red-700">
+        <% @form.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <p class="text-gray-600 mb-6">Choose the primary sport for your academy</p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <% ['soccer', 'basketball', 'volleyball', 'rugby'].each do |sport| %>
+      <label class="relative flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-400 transition <%= 'border-indigo-600 bg-indigo-50' if @form.sport == sport %>">
+        <%= f.radio_button :sport, sport, class: "w-4 h-4" %>
+        <span class="ml-3 text-lg font-medium capitalize"><%= sport %></span>
+      </label>
+    <% end %>
+  </div>
+
+  <div class="flex gap-4 pt-6">
+    <%= link_to "Back", onboarding_step_1_path, class: "px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50" %>
+    <%= f.submit "Next", class: "flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700" %>
+  </div>
+<% end %>

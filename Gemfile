@@ -22,6 +22,8 @@ gem "stimulus-rails"
 gem "tailwindcss-rails"
 gem "thruster", require: false
 gem "turbo-rails"
+gem "stripe"
+gem "stripe_event"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 group :development, :test do

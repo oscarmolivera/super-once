@@ -11,6 +11,13 @@ class AcademyPolicy < ApplicationPolicy
   # Only owner can delete the academy entirely (Phase 6 concern)
   def destroy? = owner?
 
+  # Billing authorization (Phase 6)
+  def manage_billing? = owner?
+  def view_billing?   = admin?
+  def upgrade_plan?   = owner? && !record.subscription&.plan&.pro?
+  def downgrade_plan? = owner? && record.subscription&.plan&.free? == false
+  def cancel_subscription? = owner?
+
   class Scope < ApplicationPolicy::Scope
     def resolve = scope.all
   end

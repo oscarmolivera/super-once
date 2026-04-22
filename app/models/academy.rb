@@ -1,6 +1,8 @@
 class Academy < ApplicationRecord
   # This IS the tenant. Every model calls `acts_as_tenant(:academy)`.
   # ── Associations ────────────────────────────────────────────────
+  has_one :subscription, dependent: :destroy
+  has_one :plan, through: :subscription
   has_many :memberships,    dependent: :destroy
   has_many :users,          through: :memberships
   has_many :invitations,    dependent: :destroy
